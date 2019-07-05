@@ -1,0 +1,166 @@
+/*
+LICENSE
+This software is free for use and redistribution while including this
+license notice, unless:
+1. is used for commercial or non-personal purposes, or
+2. used for a product which includes or associated with a blockchain or other
+decentralized database technology, or
+3. used for a product which includes or associated with the issuance or use
+of cryptographic or electronic currencies/coins/tokens.
+On all of the mentioned cases, an explicit and written permission is required
+from the Author (Ohad Asor).
+Contact ohad@idni.org for requesting a permission. This license may be
+modified over time by the Author.
+*/
+
+* { box-sizing: border-box; }
+body { padding: 0; margin: 0; }
+body {
+	font-family: Consolas, Menlo, Monaco, 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace, serif;
+	font-size: 16px;
+}
+body { border: 0px; }
+body { background-color: #1d303f; color: #909090; }
+h1 { text-align: center; margin: 0.2em 0; }
+h1 { color: white; }
+a { color: #909090; text-decoration: none; }
+
+
+.OFF_output-container {
+	font-size: 12px;
+ 	font-family: Consolas, Menlo, Monaco, 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace, serif;
+	background: black;
+	color: cornflowerblue;
+	width: 100%;
+	height: 25em;
+	overflow: auto;
+	border: 0px solid gray;
+	white-space: pre;
+	padding: 0.3em;
+	margin: 0;
+}
+
+.CodeMirror {
+	font-size: 12px;
+	font-family: Consolas, Menlo, Monaco, 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace, serif;
+	background: #15212d;
+	color: pink;
+}
+.CodeMirror-cursor { border-left: 1px solid #A9B7C6; }
+.CodeMirror-activeline-background { background: #323232; }
+.CodeMirror-gutters { background: #313335; border-right: 1px solid #313335; }
+.CodeMirror-guttermarker { color: #FFEE80; }
+.CodeMirror-guttermarker-subtle { color: #D0D0D0; }
+.CodeMirrir-linenumber { color: #606366; }
+.CodeMirror-matchingbracket { background-color: #3B514D; color: #FFEF28 !important; font-weight: bold; }
+
+div.CodeMirror-selected { background: #214283; }
+
+.cm-error
+{
+	color: red;
+	font-style: italic;
+}
+
+.cm-comment, .comment
+{
+	color: darkolivegreen;
+}
+
+.cm-open_brace, .open_brace,
+.cm-close_brace, .close_brace,
+.cm-dot, .dot,
+.cm-alt, .alt,
+.cm-and, .and,
+.cm-or, .or,
+.cm-delimiter, .delimiter,
+.cm-production.cm-delimiter, .production.delimiter
+{
+	/*color: white;*/
+	color: lightgray;
+}
+
+.cm-open_paren, .open_paren,
+.cm-close_paren, .close_paren
+{
+	color: #606060;
+}
+
+.cm-filename,
+.filename,
+.cm-string,
+.string
+{
+	color: white;
+}
+
+.cm-keyword,
+.keyword
+{
+	color: cornflowerblue;
+}
+
+.cm-not,
+.not {
+	color: #c11;
+}
+
+.cm-relation,
+.relation
+{
+	color: #23abcd;
+}
+
+.cm-body.cm-relation,
+.body.relation
+{
+	color: #f94;
+}
+
+.cm-head.cm-relation,
+.head.relation
+{
+	color: #ad4;
+}
+
+.cm-directive.cm-relation,
+.directive.relation
+{
+	color: cyan;
+}
+
+.cm-production.cm-relation,
+.production.relation
+{
+	color: gold;
+}
+
+.cm-query.cm-relation,
+.query.relation,
+.cm-excl_mark,
+.excl_mark
+{
+	color: darkorange;
+}
+
+.cm-number, .cm-char, .cm-atom,
+.number, .char, .atom
+{
+	font-weight: bold;
+}
+.cm-symbol, .cm-number, .cm-char, .cm-atom,
+.symbol, .number, .char, .atom
+{
+	color: silver;
+}
+
+.cm-variable, .variable
+{
+	color: gold;
+	text-decoration: underline;
+}
+
+span.cm-not+span.cm-relation
+{
+	color: #c11!Important;
+}

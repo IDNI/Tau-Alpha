@@ -1,0 +1,10 @@
+**/cmake_install.cmake
+**/CMakeFiles
+**/CMakeCache.txt
+**/Makefile
+
+src/alpha
+
+.vscode
+
+docroot/resources/codemirror_grammar/codemirror_grammar.js

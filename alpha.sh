@@ -20,7 +20,7 @@ if [ ! -f ./alpha ]; then
 	./release.sh
 fi
 
-$(sleep 2 && xdg-open http://localhost:19061)&
-./alpha --docroot ../docroot --http-listen localhost:19061
+$(sleep 2 && xdg-open http://localhost:6283)&
+./alpha --docroot ../docroot --http-listen localhost:6283
 
 cd $DIR

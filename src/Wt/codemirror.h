@@ -52,9 +52,9 @@ public:
 		textArea_ = this->addWidget(std::make_unique<WTextArea>());
 		textArea_->textInput().connect([this]{
 			std::stringstream js; js
-				<< "setTimeout (function() {"
+				<< "setTimeout (function() {\n"
 				<< jsRef() << ".cm.getDoc().setValue("
-				<< jsValue() << ");"
+				<< jsValue() << ");\n"
 				<< "}, 0);\n";
 			DBG(Wt::log("info")<<js.str();)
 			this->doJavaScript(js.str());
@@ -70,7 +70,7 @@ public:
 			<< "\tself.updateTimeout = "
 				<< "setTimeout(debouncedUpdate, 200); \n"
 			<< "\tfunction debouncedUpdate() {\n"
-			<< "\t\tself.cm.getTextArea().value = cm.getValue();\n"
+			<< "\t\t" << textArea_->jsRef() << ".value = cm.getValue();\n"
 			<< "\t\t"<<onUpdate_.createCall({"cm.getValue()"})<<"\n"
 			<< "\t}\n"
 			<< "});\n"

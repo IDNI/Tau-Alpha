@@ -70,7 +70,7 @@ public:
 			<< "\tself.updateTimeout = "
 				<< "setTimeout(debouncedUpdate, 200); \n"
 			<< "\tfunction debouncedUpdate() {\n"
-			<< "\t\t" << textArea_->jsRef() << ".value = cm.getValue();\n"
+			<< "\t\t" << jsValue() << " = cm.getValue();\n"
 			<< "\t\t"<<onUpdate_.createCall({"cm.getValue()"})<<"\n"
 			<< "\t}\n"
 			<< "});\n"

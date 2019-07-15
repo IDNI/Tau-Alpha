@@ -14,14 +14,15 @@
 #define __WT_ALPHA_H__
 
 #include <string>
+
 #include <Wt/WApplication.h>
 #include <Wt/WString.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WPopupMenu.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WToolBar.h>
+#include <TML.h>
 
-#include "../../submodules/TML/src/driver.h"
 #include "splitjs.h"
 #include "TML_editor.h"
 

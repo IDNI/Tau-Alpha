@@ -1,26 +1,8 @@
 #!/bin/bash
 
-DIR=$(pwd)
-BASEDIR=$( cd "$(dirname "$0")" ; pwd -P )
-TMLDIR="$BASEDIR/submodules/TML"
-
-if [ ! -f $TMLDIR/README.md ]; then
-	cd $TMLDIR
-	git submodule update --init --recursive
-fi
-
-if [ ! -f $TMLDIR/src/libTML.so ]; then
-	cd $TMLDIR/src
-	./release.sh
-fi
-
-cd $BASEDIR/src
-
-if [ ! -f ./alpha ]; then
+if [ ! -f ./build-Release/alpha ]; then
 	./release.sh
 fi
 
 $(sleep 2 && xdg-open http://localhost:6283)&
-./alpha --docroot ../docroot --http-listen localhost:6283
-
-cd $DIR
+./build-Release/alpha --docroot ./docroot --http-listen localhost:6283

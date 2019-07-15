@@ -38,7 +38,7 @@ alpha::alpha(const WEnvironment& env) : WApplication(env) {
 	// addMetaHeader("viewport", "width=device-width, initial-scale=1");
 
 	// load messages from alpha.xml
-	messageResourceBundle().use(appRoot()+"alpha", false);
+	messageResourceBundle().use("messages/alpha", false);
 
 	// setup title, show title in header and add container c_ (div)
 	WString title = tr("Tau Alpha");

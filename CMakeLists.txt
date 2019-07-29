@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(alpha)
 
-set(CMAKE_VERBOSE_MAKEFILE true CACHE BOOL "")
+set(CMAKE_VERBOSE_MAKEFILE true)
 set(TML_DIR ${PROJECT_SOURCE_DIR}/submodules/TML)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -18,6 +18,7 @@ set(ALPHA_HEADERS
 set(ALPHA_SOURCES
 	src/main.cpp
 	src/Wt/alpha.cpp
+	src/Wt/runtime.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"
@@ -27,7 +28,7 @@ set(ALPHA_COMPILE_OPTION
 find_package(Wt REQUIRED MODULE)
 
 add_subdirectory(${TML_DIR})
-set_target_properties(tml PROPERTIES
+set_target_properties(tml TML PROPERTIES
 	EXCLUDE_FROM_ALL 1 # do not build tml executable by default
 	EXCLUDE_FROM_DEFAULT_BUILD 1) # ... library is enough
 
@@ -48,4 +49,4 @@ endif()
 target_setup(alpha)
 target_sources(alpha PRIVATE ${ALPHA_SOURCES} ${ALPHA_HEADERS})
 target_include_directories(alpha PRIVATE ${Wt_INCLUDE_DIR})
-target_link_libraries(alpha TML ${Wt_LIBRARY} ${Wt_HTTP_LIBRARY})
+target_link_libraries(alpha TMLs ${Wt_LIBRARY} ${Wt_HTTP_LIBRARY})

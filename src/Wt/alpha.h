@@ -21,6 +21,7 @@
 #include <Wt/WPopupMenu.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WToolBar.h>
+#include <Wt/WJavaScript.h>
 #include <TML.h>
 
 #include "splitjs.h"
@@ -46,11 +47,16 @@ private:
 	splitjs *sc_;
 	TML_editor *editor_;
 	TML_editor *output_;
-	WTemplate * sb_;
+	WTemplate *sb_;
+	WPushButton *run_btn_;
+	WPushButton *runjs_btn_;
+
+	JSignal<bool, double> result_;
 
 	status status_ = INIT;
 	bool changed_ = false;
 
+	void load_tml_js();
 	void create_menu();
 	void create_toolbar();
 	void create_splitter();
@@ -70,6 +76,7 @@ private:
 	}
 	void run_tml();
 	void run_tml(std::string prog);
+	void run_tml_js();
 	void log(std::string message) { alpha::log("info", message); }
 	void log(std::string level, std::string message);
 };

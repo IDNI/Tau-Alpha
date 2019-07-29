@@ -95,13 +95,17 @@ public:
 	}
 
 	void setText(std::string text) {
-		std::stringstream js;
 		textArea_->setValueText(text);
+		sync();
+	}
+
+	void sync() {
+		std::stringstream js;
 		js << "setTimeout (function() {"
 			<< jsRef() << ".cm.getDoc().setValue("
 			<< jsValue() << ");"
 			<< "}, 0);\n";
-		DBG(Wt::log("info")<<js.str();)
+		Wt::log("sync")<<js.str();
 		this->doJavaScript(js.str());
 	}
 

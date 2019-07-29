@@ -34,11 +34,16 @@ int alpha::run(int argc, char** argv) {
 	});
 }
 
-alpha::alpha(const WEnvironment& env) : WApplication(env) {
+alpha::alpha(const WEnvironment& env) :
+	WApplication(env),
+	result_(this, "result")
+{
 	// addMetaHeader("viewport", "width=device-width, initial-scale=1");
 
 	// load messages from alpha.xml
 	messageResourceBundle().use("messages/alpha", false);
+
+	load_tml_js();
 
 	// setup title, show title in header and add container c_ (div)
 	WString title = tr("Tau Alpha");
@@ -123,56 +128,19 @@ void alpha::create_statusbar() {
 void alpha::create_toolbar() {
 	auto tb = c_->addWidget(make_unique<WToolBar>());
 	auto run_btn = make_unique<WPushButton>(tr("RUN"));
-	run_btn->clicked().connect([this]{ run_tml(); bdd::gc(); });
+	run_btn->clicked().connect([this]{ run_tml(); });
+	run_btn_ = run_btn.get();
 	tb->addButton(move(run_btn));
-}
-
-void alpha::run_tml() {
-	run_tml(editor_->getText());
-}
-
-unsigned long run_tml_counter = 0;
-void alpha::run_tml(std::string prog) {
-	unsigned long id = ++run_tml_counter;
-	Wt::log("info")<<"TML(" << id << ") run";
-	update_status(RUNNING);
-	not_changed();
-	std::vector<string> args = {
-		"--output", "@buffer",
-		"--error",  "@buffer",
-		"--info",   "@buffer",
-		"--debug",  "@buffer"
-	};
-	output_->setText("");
-
-	clock_t start = clock(), end;
-	driver d(0, 0, s2ws(prog), ::options(args));
-	end = clock();
-
-	if (!d.result) update_status(UNSAT);
-	else update_status(FINISHED);
-
-	std::string s = ws2s(::output::read(s2ws(string("output"))));
-	// trim new lines
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-		return ch != 10 && ch != 13;
-	}));
-	output_->setText(s);
-
-	DBG(log("debug", ws2s(::output::read(s2ws(string("debug")))));)
-	log("info", ws2s(::output::read(s2ws(string("info")))));
-	log("error", ws2s(::output::read(s2ws(string("error")))));
-
-	double e = 1000 * double(end - start) / CLOCKS_PER_SEC;
-	Wt::log("info")<<"TML(" << id << ") " << status_name[status_]
-		<< " - elapsed: " << e << " ms";
-	elapsed(e);
+	auto runjs_btn = make_unique<WPushButton>(tr("RUN JS"));
+	runjs_btn->clicked().connect([this]{ run_tml_js(); });
+	runjs_btn_ = runjs_btn.get();
+	tb->addButton(move(runjs_btn));
 }
 
 void alpha::log(std::string level, std::string message) {
 	std::stringstream js; js
-		<< "console.log(`" << level << "\n`, "
-		<< std::quoted(message, '`') << ");";
+	<< "console.log(`" << level << "\n`, "
+	<< std::quoted(message, '`') << ");";
 	this->doJavaScript(js.str());
 }
 

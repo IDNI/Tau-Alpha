@@ -42,6 +42,7 @@ modified over time by the Author.</message>
 
 <message id="DEBUG">DEBUG</message>
 <message id="RUN">RUN</message>
+<message id="RUN JS">RUN JS</message>
 
 <message id="error">error</message>
 <message id="init">init</message>

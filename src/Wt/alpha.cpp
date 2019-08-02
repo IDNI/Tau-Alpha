@@ -127,14 +127,18 @@ void alpha::create_statusbar() {
 
 void alpha::create_toolbar() {
 	auto tb = c_->addWidget(make_unique<WToolBar>());
+#ifndef DISABLE_SERVER_EVALUATION
 	auto run_btn = make_unique<WPushButton>(tr("RUN"));
 	run_btn->clicked().connect([this]{ run_tml(); });
 	run_btn_ = run_btn.get();
 	tb->addButton(move(run_btn));
+#endif
+#ifndef DISABLE_LOCAL_EVALUATION
 	auto runjs_btn = make_unique<WPushButton>(tr("RUN JS"));
 	runjs_btn->clicked().connect([this]{ run_tml_js(); });
 	runjs_btn_ = runjs_btn.get();
 	tb->addButton(move(runjs_btn));
+#endif
 }
 
 void alpha::log(std::string level, std::string message) {

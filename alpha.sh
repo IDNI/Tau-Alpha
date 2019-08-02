@@ -4,5 +4,5 @@ if [ ! -f ./build-Release/alpha ]; then
 	./release.sh
 fi
 
-$(sleep 2 && xdg-open http://localhost:6283)&
-./build-Release/alpha --docroot ./docroot --http-listen localhost:6283
+#$(sleep 2 && xdg-open http://localhost:6283 2>&1 >/dev/null)&
+./build-Release/alpha --docroot ./docroot --http-listen 0.0.0.0:6283

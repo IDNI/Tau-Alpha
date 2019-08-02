@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f ./build-Release/alpha ]; then
-	if [ -f /esmdk/emsdk_env.sh ]; then
+	if [ -f /emsdk/emsdk_env.sh ]; then
 		source /emsdk/emsdk_env.sh
 	fi
 	./release.sh

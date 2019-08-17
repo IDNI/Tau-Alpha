@@ -20,30 +20,45 @@ namespace Wt {
 
 class splitjs : public WContainerWidget {
 public:
-	splitjs() {
+	enum direction { VERTICAL, HORIZONTAL };
+	splitjs(direction d = VERTICAL, std::string s = "50,50") :
+		direction_(d),
+		sizes_(s)
+	{
 		WApplication* app = WApplication::instance();
 		app->require(app->resolveRelativeUrl(
 			"resources/splitjs/split.min.js"));
 		app->useStyleSheet(app->resolveRelativeUrl(
 			"resources/splitjs/splitjs.css"));
-		this->addStyleClass("flex-column");
+		this->addStyleClass(direction_ == VERTICAL
+			? "flex-column"
+			: "flex-row");
 		first_  = this->addWidget(std::make_unique<WContainerWidget>());
 		second_ = this->addWidget(std::make_unique<WContainerWidget>());
 		std::stringstream js; js
 			<< "Split(['#"
 			<< first_->id() << "', '#" << second_->id()
 			<< "'], {\n"
-			<< "\tsizes: [ 50, 50 ],\n"
+			<< "\tsizes: [ " << sizes_ << " ],\n"
 			<< "\tminSize: 0,\n"
-			<< "\tdirection: 'vertical',\n"
-			<< "\tcursor: 'row-resize',\n"
+			<< "\tdirection: '"
+			<< (direction_ == VERTICAL ? "vertical" : "horizontal")
+			<< "',\n"
+			<< "\tcursor: '"
+			<< (direction_ == VERTICAL ? "row" : "col")
+			<< "-resize',\n"
 			<< "})\n";
 		DBG(Wt::log("info")<<js.str();)
 		this->doJavaScript(js.str());
 	}
+	std::string direction_string() const {
+		return direction_ == VERTICAL ? "vertical" : "horizontal";
+	}
 	WContainerWidget *first() { return first_; }
 	WContainerWidget *second() { return second_; }
 private:
+	direction direction_;
+	std::string sizes_;
 	WContainerWidget *first_;
 	WContainerWidget *second_;
 };

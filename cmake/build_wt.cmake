@@ -39,9 +39,8 @@ set(WT_BUILD_OPTIONS
 # builds wt
 function(build_wt)
 	find_path(WT_EXISTS libwt.a ${WT_INSTALL_DIR}/lib)
-	message("WT_EXISTS ${WT_EXISTS}")
 	if((NOT WT_EXISTS) OR (NOT EXISTS ${WT_INSTALL_DIR}/lib/libwt.a))
-		message("wt building at ${WT_BUILD_DIR}")
+		message("--- wt building at ${WT_BUILD_DIR}")
 		execute_process(
 			COMMAND mkdir -p ${WT_BUILD_DIR} ${WT_INSTALL_DIR}
 			WORKING_DIRECTORY ${WT_DIR}
@@ -58,9 +57,9 @@ function(build_wt)
 			COMMAND make install
 			WORKING_DIRECTORY ${WT_BUILD_DIR}
 		)
-		message("wt built at ${WT_BUILD_DIR}")
+		message("--- wt built at ${WT_BUILD_DIR}")
 	else()
-		message("wt found ${WT_DIR}")
+		message("--- wt found ${WT_DIR}")
 	endif()
 	set(CMAKE_MODULE_PATH "${WT_INSTALL_DIR}/lib/cmake/wt" ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 endfunction()

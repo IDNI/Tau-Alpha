@@ -18,9 +18,8 @@ set(BOOST_BUILD_OPTIONS
 # builds boost
 function(build_boost)
 	find_path(BOOST_EXISTS libboost_system.a ${BOOST_BUILD_DIR}/lib)
-	message("BOOST_EXISTS ${BOOST_EXISTS}")
 	if((NOT BOOST_EXISTS) OR (NOT EXISTS ${BOOST_BUILD_DIR}/lib/libboost_system.a))
-		message("boost building at ${BOOST_DIR}")
+		message("--- boost building at ${BOOST_DIR}")
 		execute_process(
 			COMMAND git submodule update --init
 			WORKING_DIRECTORY ${BOOST_DIR}
@@ -37,9 +36,9 @@ function(build_boost)
 			COMMAND ./b2 install
 			WORKING_DIRECTORY ${BOOST_DIR}
 		)
-		message("boost built at ${BOOST_BUILD_DIR}")
+		message("--- boost built at ${BOOST_BUILD_DIR}")
 	else()
-		message("boost found at ${BOOST_BUILD_DIR}")
+		message("--- boost found at ${BOOST_BUILD_DIR}")
 	endif()
 endfunction()
 

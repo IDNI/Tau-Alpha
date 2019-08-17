@@ -35,7 +35,7 @@ void alpha::run_tml(string prog) {
 	output_->setText("");
 
 	clock_t start = clock(), end;
-	driver d(0, 0, s2ws(prog), ::options(args));
+	driver d(s2ws(prog), ::options(args));
 	end = clock();
 	bdd::gc();
 
@@ -115,7 +115,7 @@ void alpha::run_tml_js() {
 	<< "as.push_back('--debug');\n"
 	<< "as.push_back('@buffer');\n"
 	<< "const o = new options();\n"
-	<< "o.parse(as);\n"
+	<< "o.parse(as, false);\n"
 	<< "const start = performance.now();\n"
 	<< "const d = driver.create(" << editor_->jsValue() << ", o);\n"
 	<< "const e = performance.now() - start;\n"

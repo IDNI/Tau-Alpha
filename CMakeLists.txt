@@ -15,12 +15,17 @@ set(TML_DIR   ${PROJECT_SOURCE_DIR}/submodules/TML)
 set(WT_DIR    ${PROJECT_SOURCE_DIR}/submodules/wt)
 set(BOOST_DIR ${PROJECT_SOURCE_DIR}/submodules/boost)
 set(ZLIB_DIR  ${PROJECT_SOURCE_DIR}/submodules/zlib)
+set(EMSDK_DIR ${PROJECT_SOURCE_DIR}/submodules/emsdk)
 
 include(init_submodule)
 init_submodule(${TML_DIR})
 init_submodule(${ZLIB_DIR})
 init_submodule(${BOOST_DIR})
 init_submodule(${WT_DIR})
+init_submodule(${EMSDK_DIR})
+
+include(install_and_activate_emsdk)
+install_and_activate_emsdk(${EMSDK_DIR})
 
 set(ALPHA_HEADERS
 	src/Wt/alpha.h
@@ -48,7 +53,6 @@ find_library(ZLIB_LIBRARY NAMES z PATHS ${ZLIB_DIR})
 include(build_boost)
 build_boost()
 set(BOOST_ROOT ${BOOST_BUILD_DIR})
-message("boost is at ${BOOST_ROOT}")
 find_package(Boost REQUIRED COMPONENTS
 	"program_options;thread;atomic;system;filesystem;chrono;date_time"
 )
@@ -71,6 +75,7 @@ set_target_properties(tml TML PROPERTIES
 add_executable(alpha)
 
 # add tml.js if emscripten available
+set(EMSCRIPTEN_DIR "${EMSDK_DIR}/fastcomp/emscripten")
 list(APPEND CMAKE_MODULE_PATH ${TML_DIR}/cmake)
 include(emscripten_toolchain)
 emscripten_toolchain_available(EMSCRIPTEN_TOOLCHAIN_AVAILABLE)
@@ -80,7 +85,7 @@ if(ENABLE_LOCAL_EVALUATION)
 		add_tml_js_lib()
 		add_dependencies(alpha tml_js_lib)
 	else()
-		message("emscripten toolchain not found. skipping tml.js")
+		message("--- emscripten toolchain not found. skipping tml.js")
 	endif()
 endif()
 

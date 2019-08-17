@@ -26,6 +26,7 @@
 
 #include "splitjs.h"
 #include "TML_editor.h"
+#include "workspace.h"
 
 Wt::WString tr(std::string s);
 typedef enum status_values { ERROR,
@@ -44,6 +45,8 @@ private:
 		bool linenumbers = true;
 	} o;
 	WContainerWidget *c_;
+	workspace *workspace_;
+	splitjs *wsc_;
 	splitjs *sc_;
 	TML_editor *editor_;
 	TML_editor *output_;
@@ -59,7 +62,7 @@ private:
 	void load_tml_js();
 	void create_menu();
 	void create_toolbar();
-	void create_splitter();
+	void create_splitters_ui();
 	void create_statusbar();
 
 	void elapsed(double ms) {

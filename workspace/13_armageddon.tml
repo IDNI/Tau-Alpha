@@ -1,0 +1,22 @@
+# There are birds Charlie and Coco
+bird(Charlie).
+bird(Coco).
+
+# and there are humans John and Jane,
+human(John).
+human(Jane).
+
+# Uncomment the following line to end the world
+# armageddon.
+
+# bird is a being
+being(?x) :- bird(?x).
+
+# human is a being
+being(?x) :- human(?x).
+
+# beings are mortal
+mortal(?x) :- being(?x).
+
+# if armageddon, then all mortals die
+dead(?x) :- mortal(?x), armageddon.

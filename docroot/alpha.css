@@ -164,3 +164,20 @@ span.cm-not+span.cm-relation
 {
 	color: #c11!Important;
 }
+
+.workspace
+{
+	background-color: white;
+	overflow: auto;
+	height: 800px;
+}
+
+.splitter_workspace
+{
+	height: 800px;
+}
+
+.splitter_editor
+{
+	height: 800px;
+}

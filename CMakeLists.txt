@@ -32,11 +32,15 @@ set(ALPHA_HEADERS
 	src/Wt/codemirror.h
 	src/Wt/TML_editor.h
 	src/Wt/splitjs.h
+	src/Wt/workspace.h
+	src/Wt/file_item.h
 )
 set(ALPHA_SOURCES
 	src/main.cpp
 	src/Wt/alpha.cpp
 	src/Wt/runtime.cpp
+	src/Wt/workspace.cpp
+	src/Wt/file_item.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"

@@ -54,22 +54,8 @@ alpha::alpha(const WEnvironment& env) :
 
 	create_menu();
 	create_toolbar();
-	create_splitter();
+	create_splitters_ui();
 	create_statusbar();
-
-	WApplication::instance()->useStyleSheet(
-		WApplication::instance()->resolveRelativeUrl("alpha.css"));
-
-	std::stringstream ss;
-	DBG(ss << tr(string("i_debug"));)
-	NDBG(ss << tr(string("i_intro"));)
-	editor_->setText(ss.str());
-}
-
-void alpha::create_splitter() {
-	sc_ = c_->addWidget(make_unique<splitjs>());
-	editor_ = sc_->first()->addWidget(make_unique<TML_editor>());
-	output_ = sc_->second()->addWidget(make_unique<TML_editor>());
 
 	editor_->setOption("lineNumbers", "'true'");
 	editor_->onUpdate().connect([this](std::string prog){
@@ -77,6 +63,24 @@ void alpha::create_splitter() {
 		else changed();
 	});
 	output_->setOption("readOnly", "'nocursor'");
+
+	WApplication::instance()->useStyleSheet(
+		WApplication::instance()->resolveRelativeUrl("alpha.css"));
+
+	workspace_->setEditor(editor_);
+	workspace_->setFile("./workspace", "01_intro.tml");
+	workspace_->setTitle("intro");
+	workspace_->onShowFile([this](){ update_status(INIT); });
+}
+
+void alpha::create_splitters_ui() {
+	wsc_ = c_->addWidget(make_unique<splitjs>(splitjs::direction::HORIZONTAL, "30,70"));
+	wsc_->addStyleClass("splitter_workspace");
+	workspace_ = wsc_->first()->addWidget(make_unique<workspace>("./workspace/"));
+	sc_ = wsc_->second()->addWidget(make_unique<splitjs>());
+	sc_->addStyleClass("splitter_editor");
+	editor_ = sc_->first()->addWidget(make_unique<TML_editor>());
+	output_ = sc_->second()->addWidget(make_unique<TML_editor>());
 }
 
 void alpha::create_menu() {
@@ -101,21 +105,6 @@ void alpha::create_menu() {
 	auto sb = make_unique<WPushButton>(tr("settings"));
 	sb->setMenu(move(sm));
 	tb->addButton(move(sb));
-
-	auto em = make_unique<WPopupMenu>(); // examples menu
-	std::vector<string> intros = { "intro", "FACTS", "RELATIONS",
-		"ARITY", "RULES", "VARIABLES", "AND/OR", "RECURSION",
-		"TRANSITIVE CLOSURE", "DELETION", "NEGATION",
-		"family", "armageddon", "UNSAT", "DYCK", "tml.g" };
-	DBG(intros.push_back("debug");)
-	for (string i : intros)
-		em->addItem(tr(i))->triggered().connect([this, i]{
-			std::stringstream ss; ss << tr(string("i_")+i);
-			editor_->setText(ss.str());
-		});
-	auto eb = make_unique<WPushButton>(tr("examples"));
-	eb->setMenu(move(em));
-	tb->addButton(move(eb));
 }
 
 void alpha::create_statusbar() {

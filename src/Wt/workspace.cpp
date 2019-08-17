@@ -141,11 +141,12 @@ void workspace::traverseDir(WStandardItem* parent, const fs::path& path) {
 
 		sort(dirs.begin(), dirs.end(), comparePaths);
 
+		for (unsigned int i = 0; i < dirs.size(); i++)
+			traverseDir(parent, dirs[i]);
+
 		for (unsigned int i = 0; i < files.size(); i++)
 			parent->appendRow(move(files[i]));
 
-		for (unsigned int i = 0; i < dirs.size(); i++)
-			traverseDir(parent, dirs[i]);
 	} catch (fs::filesystem_error& e) {
 		cerr << e.what() << endl;
 	}

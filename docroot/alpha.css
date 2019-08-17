@@ -165,9 +165,21 @@ span.cm-not+span.cm-relation
 	color: #c11!Important;
 }
 
+.workspace_title
+{
+	color: white;
+	font-weight: bold;
+	border: 10px solid #1d303f;
+	border-top: 0;
+	border-left: 0;
+	border-right: 0;
+	padding: 0 0 6px 0;
+	margin-bottom: 2px;
+}
+
 .workspace
 {
-	background-color: white;
+	background-color: #15212d;
 	overflow: auto;
 	height: 800px;
 }

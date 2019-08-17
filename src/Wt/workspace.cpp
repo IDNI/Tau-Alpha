@@ -81,6 +81,7 @@ void workspace::setFile(const string& dir, const string& file) {
 
 	auto layout = make_unique<WVBoxLayout>();
 	title_ = layout->addWidget(make_unique<WText>(""));
+	title_->addStyleClass("workspace_title");
 	layout->addWidget(move(view), 1);
 	setLayout(move(layout));
 	setStyleClass("workspace");

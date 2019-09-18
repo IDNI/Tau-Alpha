@@ -50,7 +50,7 @@ void workspace::setFile(const string& dir, const string& file) {
 	}
 
 	if (!exists) {
-		addWidget(make_unique<WText>("No such program: " + dir));
+		addWidget(make_unique<WText>("No such directory: " + dir));
 		return;
 	}
 

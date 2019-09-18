@@ -11,8 +11,10 @@
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
 #include <iomanip>
+#include <Wt/WTabWidget.h>
 #include <Wt/WEnvironment.h>
 #include <Wt/WText.h>
+#include <Wt/WStackedWidget.h>
 #include "alpha.h"
 
 Wt::WString tr(std::string s) { return Wt::WString::tr(s); }
@@ -51,6 +53,7 @@ alpha::alpha(const WEnvironment& env) :
 	root()->addWidget(
 		std::make_unique<WText>(WString("<h1>{1}</h1>").arg(title)));
 	c_ = root()->addWidget(make_unique<WContainerWidget>());
+	c_->setHeight("80%");
 
 	create_menu();
 	create_toolbar();
@@ -66,7 +69,9 @@ alpha::alpha(const WEnvironment& env) :
 
 	WApplication::instance()->useStyleSheet(
 		WApplication::instance()->resolveRelativeUrl("alpha.css"));
-
+	WApplication::instance()->useStyleSheet(
+		WApplication::instance()->resolveRelativeUrl(
+			"resources/bootstrap.reduced.css"));
 	workspace_->setEditor(editor_);
 	workspace_->setFile("./workspace", "01_intro.tml");
 	workspace_->setTitle("intro");
@@ -74,13 +79,63 @@ alpha::alpha(const WEnvironment& env) :
 }
 
 void alpha::create_splitters_ui() {
-	wsc_ = c_->addWidget(make_unique<splitjs>(splitjs::direction::HORIZONTAL, "30,70"));
+	wsc_ = c_->addWidget(make_unique<splitjs>(splitjs::direction::HORIZONTAL, "20,80"));
 	wsc_->addStyleClass("splitter_workspace");
-	workspace_ = wsc_->first()->addWidget(make_unique<workspace>("./workspace/"));
+	workspace_ = wsc_->first()->addWidget(make_unique<workspace>("./workspace"));
 	sc_ = wsc_->second()->addWidget(make_unique<splitjs>());
 	sc_->addStyleClass("splitter_editor");
+
 	editor_ = sc_->first()->addWidget(make_unique<TML_editor>());
-	output_ = sc_->second()->addWidget(make_unique<TML_editor>());
+	auto c = sc_->second()->addWidget(make_unique<WContainerWidget>());
+	c->resize("100%", "100%");
+
+	tabs_ = c->addNew<WTabWidget>();
+	tabs_->setStyleClass("tabwidget");
+	//tabs_->resize(WLength(100, LengthUnit::Percentage), WLength(100, LengthUnit::Percentage));
+
+	// output tab
+	auto output = make_unique<TML_editor>();
+	output_ = output.get();
+	tabs_->addTab(move(output), "output");
+
+	// tabular tab
+	auto tabular = make_unique<WContainerWidget>();
+	tabular_ = tabular.get();
+	tabs_->addTab(move(tabular), "tabular");
+
+	// tabular tab widget containing out tables
+	tabular_tabs_ = tabular_->addWidget(make_unique<WTabWidget>());
+	tabular_tabs_->setStyleClass("tabwidget tabular-tabs");
+
+	// WAnimation animation(AnimationEffect::SlideInFromLeft, TimingFunction::EaseIn);
+	// tabular_tabs_->contentsStack()->setTransitionAnimation(animation, true);
+	tabular_tabs_->contentsStack()->removeStyleClass("Wt-stack");
+
+	// // binary tab
+	// auto binary = make_unique<WContainerWidget>();
+	// binary_ = binary.get();
+	// binary_->addStyleClass("text-tab binary-tab");
+	// tabs_->addTab(move(binary), "bin");
+
+	// info tab
+	auto info = make_unique<WContainerWidget>();
+	info_ = info.get();
+	info_->addStyleClass("text-tab info-tab");
+	tabs_->addTab(move(info), "info");
+
+	// errors tab
+	auto errors = make_unique<WContainerWidget>();
+	errors_ = errors.get();
+	errors_->addStyleClass("text-tab error-tab");
+	tabs_->addTab(move(errors), "errors");
+
+	// debug tab
+	auto debug = make_unique<WContainerWidget>();
+	debug_ = debug.get();
+	debug_->addStyleClass("text-tab debug-tab");
+#ifdef DEBUG
+	tabs_->addTab(move(debug), "debug");
+#endif
 }
 
 void alpha::create_menu() {
@@ -135,6 +190,14 @@ void alpha::log(std::string level, std::string message) {
 	<< "console.log(`" << level << "\n`, "
 	<< std::quoted(message, '`') << ");";
 	this->doJavaScript(js.str());
+}
+
+void alpha::add_text(WContainerWidget* w, const std::string& text) {
+	w->addWidget(std::make_unique<WText>(WString(text)));
+}
+
+void alpha::add_text(WContainerWidget* w, const std::wstring& text) {
+	add_text(w, ws2s(text));
 }
 
 }

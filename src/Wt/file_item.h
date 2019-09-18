@@ -30,8 +30,7 @@ public:
 	file_item(const std::string& iconUri, const Wt::WString& text,
 		const std::string& fileName) : WStandardItem(iconUri, text)
 	{
-		boost::filesystem::path p(fileName);
-		setData(std::string(p.filename().string()), FileNameRole);
+		setData(text, FileNameRole);
 		setData(fileName, FilePathRole);
 	}
 };

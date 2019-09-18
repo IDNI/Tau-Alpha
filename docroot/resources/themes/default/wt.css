@@ -621,12 +621,16 @@ span.Wt-disabled, fieldset.Wt-disabled legend {
     padding: 10px 0px 0px;
     list-style-type: none;
     list-style-position: outside;
+/*
     background: transparent url(../../tab_b.gif) repeat-x scroll center bottom;
+*/
     overflow: auto;
 }
 
 .Wt-tabs li {
+/*
     background: transparent url(../../tab_r.gif) no-repeat scroll right top;
+*/
     border-bottom:1px solid #84B0C7;
     float:left; display:block;
     cursor:pointer;cursor:hand;
@@ -643,7 +647,9 @@ body.Wt-rtl .Wt-tabs a {
 
 .Wt-tabs a {
     display: block;
+/*
     background: transparent url(../../tab_l.gif) no-repeat scroll left top;
+*/
     border-bottom: 0px;
     white-space: nowrap;
     padding:5px 9px;

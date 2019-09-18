@@ -22,6 +22,8 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WToolBar.h>
 #include <Wt/WJavaScript.h>
+#include <Wt/WTabWidget.h>
+#include <Wt/WTable.h>
 #include <TML.h>
 
 #include "splitjs.h"
@@ -46,18 +48,28 @@ private:
 	} o;
 	WContainerWidget *c_;
 	workspace *workspace_;
-	splitjs *wsc_;
-	splitjs *sc_;
-	TML_editor *editor_;
-	TML_editor *output_;
-	WTemplate *sb_;
+	splitjs *wsc_;              // splits file tree and right part of UI
+	splitjs *sc_;               // splits editor and tabs under editor
+	TML_editor *editor_;        // editor
+	WTabWidget *tabs_;          // tabs under editor
+	TML_editor *output_;        // output tab
+	WContainerWidget *errors_;  // errors tab
+	WContainerWidget *info_;    // info tab
+	WContainerWidget *debug_;   // debug tab
+	WContainerWidget *tabular_; // tabular tab
+	WTabWidget *tabular_tabs_;  // tabular tabs with out tables
+	std::map<std::wstring, WTable*> tables_;
+	//WContainerWidget *binary_;  // binary tab
+	WTemplate *sb_;             // status bar
+
 	WPushButton *run_btn_;
 	WPushButton *runjs_btn_;
+	WPushButton *add_btn_;
 
 	JSignal<bool, double> result_;
 
 	status status_ = INIT;
-	bool changed_ = false;
+	bool changed_ = false;      // has source been changed since last run?
 
 	void load_tml_js();
 	void create_menu();
@@ -65,6 +77,15 @@ private:
 	void create_splitters_ui();
 	void create_statusbar();
 
+	void before_run();
+	void run_tml();
+	void run_tml(std::string prog);
+	void run_tml_js();
+
+	void log(std::string message) { alpha::log("info", message); }
+	void log(std::string level, std::string message);
+
+	// UI updates
 	void elapsed(double ms) {
 		std::stringstream ss; ss << ms << " ms";
 		sb_->bindString("elapsed", ss.str());
@@ -77,11 +98,12 @@ private:
 		sb_->bindString("status", tr(status_name[status_]));
 		sb_->bindInt("elapsed", 0);
 	}
-	void run_tml();
-	void run_tml(std::string prog);
-	void run_tml_js();
-	void log(std::string message) { alpha::log("info", message); }
-	void log(std::string level, std::string message);
+
+	// helpers
+	void add_text(WContainerWidget* w, const std::wstring& text);
+	void add_text(WContainerWidget* w, const std::string& text);
+	//std::string serialize_result(driver &d);
+	//void unserialize_result(driver &d, std::string bin);
 };
 
 }

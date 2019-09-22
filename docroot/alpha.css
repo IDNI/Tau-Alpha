@@ -201,7 +201,17 @@ span.cm-not+span.cm-relation
 	height: 100%;
 }
 
-.tabwidget > ul.Wt-tabs {
+.tabwidget > .Wt-stack > div {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+}
+
+.tabwidget > .Wt-stack {
+	height: calc(100% - 30px);
+}
+
+.tabwidget > .Wt-tabs {
 	margin: 0;
 	padding: 0;
 	background: #313335;
@@ -228,6 +238,7 @@ span.cm-not+span.cm-relation
 .tabular-tabs .Wt-tabs {
 	-ms-flex:0 0 20%;
 	flex:0 0 20%;
+	height: 30px;
 }
 li.tabular-row {
 	margin:0;

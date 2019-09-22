@@ -101,6 +101,7 @@ void alpha::create_splitters_ui() {
 	// tabular tab
 	auto tabular = make_unique<WContainerWidget>();
 	tabular_ = tabular.get();
+	tabular_->resize("100%", "100%");
 	tabs_->addTab(move(tabular), "tabular");
 
 	// tabular tab widget containing out tables
@@ -109,7 +110,6 @@ void alpha::create_splitters_ui() {
 
 	// WAnimation animation(AnimationEffect::SlideInFromLeft, TimingFunction::EaseIn);
 	// tabular_tabs_->contentsStack()->setTransitionAnimation(animation, true);
-	tabular_tabs_->contentsStack()->removeStyleClass("Wt-stack");
 
 	// // binary tab
 	// auto binary = make_unique<WContainerWidget>();

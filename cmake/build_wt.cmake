@@ -14,7 +14,8 @@ set(WT_BUILD_OPTIONS
 	-DBoost_NO_SYSTEM_PATHS=TRUE
 	-DBoost_USE_STATIC_LIBS=ON
 	-DBoost_USE_STATIC_RUNTIME=ON
-	-DBOOST_ROOT:PATHNAME=${BOOST_BUILD_DIR}
+	-DBOOST_INCLUDEDIR=${Boost_INCLUDE_DIRS}
+	-DBOOST_LIBRARYDIR=${Boost_LIBRARY_DIRS}
 	-DZLIB_LIBRARY=${ZLIB_LIBRARY}
 	-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR}
 	-DBUILD_EXAMPLES=OFF
@@ -35,12 +36,25 @@ set(WT_BUILD_OPTIONS
 	-DINSTALL_RESOURCES=OFF
 	-DSHARED_LIBS=OFF
 )
+set(WT_VERSION "4.1.1")
+set(WT_URL "https://github.com/emweb/wt/archive/${WT_VERSION}.tar.gz")
 
 # builds wt
 function(build_wt)
 	find_path(WT_EXISTS libwt.a ${WT_INSTALL_DIR}/lib)
 	if((NOT WT_EXISTS) OR (NOT EXISTS ${WT_INSTALL_DIR}/lib/libwt.a))
 		message("--- wt building at ${WT_BUILD_DIR}")
+		execute_process(
+			COMMAND mkdir -p "${WT_DIR}"
+		)
+		execute_process(
+			COMMAND wget -N ${WT_URL}
+			WORKING_DIRECTORY ${WT_DIR}
+		)
+		execute_process(
+			COMMAND tar xzf ${WT_VERSION}.tar.gz --strip-components=1 -C .
+			WORKING_DIRECTORY ${WT_DIR}
+		)
 		execute_process(
 			COMMAND mkdir -p ${WT_BUILD_DIR} ${WT_INSTALL_DIR}
 			WORKING_DIRECTORY ${WT_DIR}

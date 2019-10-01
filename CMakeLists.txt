@@ -12,17 +12,12 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(alpha-common)
 
 set(TML_DIR   ${PROJECT_SOURCE_DIR}/submodules/TML)
-set(WT_DIR    ${PROJECT_SOURCE_DIR}/submodules/wt)
-set(BOOST_DIR ${PROJECT_SOURCE_DIR}/submodules/boost)
-set(ZLIB_DIR  ${PROJECT_SOURCE_DIR}/submodules/zlib)
-set(EMSDK_DIR ${PROJECT_SOURCE_DIR}/submodules/emsdk)
+set(WT_DIR    ${PROJECT_SOURCE_DIR}/lib/wt)
+set(ZLIB_DIR  ${PROJECT_SOURCE_DIR}/lib/zlib)
+set(EMSDK_DIR ${PROJECT_SOURCE_DIR}/lib/emsdk)
 
 include(init_submodule)
 init_submodule(${TML_DIR})
-init_submodule(${ZLIB_DIR})
-init_submodule(${BOOST_DIR})
-init_submodule(${WT_DIR})
-init_submodule(${EMSDK_DIR})
 
 include(install_and_activate_emsdk)
 install_and_activate_emsdk(${EMSDK_DIR})
@@ -55,9 +50,6 @@ set(ZLIB_INCLUDE_DIR ${ZLIB_DIR})
 find_library(ZLIB_LIBRARY NAMES z PATHS ${ZLIB_DIR})
 
 # boost
-include(build_boost)
-build_boost()
-set(BOOST_ROOT ${BOOST_BUILD_DIR})
 find_package(Boost REQUIRED COMPONENTS
 	"program_options;thread;atomic;system;filesystem;chrono;date_time"
 )

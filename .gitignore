@@ -2,4 +2,6 @@ build-*
 
 .vscode
 
+lib
+
 docroot/resources/codemirror_grammar/codemirror_grammar.js

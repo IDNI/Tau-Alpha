@@ -2,15 +2,3 @@
 	path = submodules/TML
 	url = https://github.com/IDNI/TML
 
-[submodule "submodules/wt"]
-	path = submodules/wt
-	url = https://github.com/emweb/wt
-[submodule "submodules/zlib"]
-	path = submodules/zlib
-	url = https://github.com/madler/zlib
-[submodule "submodules/boost"]
-	path = submodules/boost
-	url = https://github.com/boostorg/boost
-[submodule "submodules/emsdk"]
-	path = submodules/emsdk
-	url = https://github.com/emscripten-core/emsdk.git

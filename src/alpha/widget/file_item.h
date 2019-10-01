@@ -10,8 +10,8 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __WT_FILE_ITEM_H__
-#define __WT_FILE_ITEM_H__
+#ifndef __FILE_ITEM_H__
+#define __FILE_ITEM_H__
 
 #include <string.h>
 
@@ -20,20 +20,24 @@
 
 #include <boost/filesystem.hpp>
 
-namespace Wt {
+namespace alpha {
 
-class file_item : public WStandardItem {
+namespace widget {
+
+class file_item : public Wt::WStandardItem {
 public:
 	static const Wt::ItemDataRole FileNameRole;
 	static const Wt::ItemDataRole FilePathRole;
 
 	file_item(const std::string& iconUri, const Wt::WString& text,
-		const std::string& fileName) : WStandardItem(iconUri, text)
+		const std::string& fileName) : Wt::WStandardItem(iconUri, text)
 	{
 		setData(text, FileNameRole);
 		setData(fileName, FilePathRole);
 	}
 };
+
+}
 
 }
 #endif

@@ -17,6 +17,10 @@
 #include "workspace.h"
 #include "file_item.h"
 
+namespace alpha {
+
+namespace widget {
+
 using namespace std;
 using namespace Wt;
 namespace fs = boost::filesystem;
@@ -175,4 +179,8 @@ void workspace::showFile() {
 		}
 	}
 	if (onShowFile_) onShowFile_();
+}
+
+}
+
 }

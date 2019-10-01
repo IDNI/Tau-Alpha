@@ -16,16 +16,18 @@
 #include <Wt/WApplication.h>
 #include <Wt/WContainerWidget.h>
 
-namespace Wt {
+namespace alpha {
 
-class splitjs : public WContainerWidget {
+namespace widget {
+
+class splitjs : public Wt::WContainerWidget {
 public:
 	enum direction { VERTICAL, HORIZONTAL };
 	splitjs(direction d = VERTICAL, std::string s = "50,50") :
 		direction_(d),
 		sizes_(s)
 	{
-		WApplication* app = WApplication::instance();
+		Wt::WApplication* app = Wt::WApplication::instance();
 		app->require(app->resolveRelativeUrl(
 			"resources/splitjs/split.min.js"));
 		app->useStyleSheet(app->resolveRelativeUrl(
@@ -33,8 +35,10 @@ public:
 		this->addStyleClass(direction_ == VERTICAL
 			? "flex-column"
 			: "flex-row");
-		first_  = this->addWidget(std::make_unique<WContainerWidget>());
-		second_ = this->addWidget(std::make_unique<WContainerWidget>());
+		first_  = this->addWidget(
+				std::make_unique<Wt::WContainerWidget>());
+		second_ = this->addWidget(
+				std::make_unique<Wt::WContainerWidget>());
 		std::stringstream js; js
 			<< "Split(['#"
 			<< first_->id() << "', '#" << second_->id()
@@ -54,14 +58,16 @@ public:
 	std::string direction_string() const {
 		return direction_ == VERTICAL ? "vertical" : "horizontal";
 	}
-	WContainerWidget *first() { return first_; }
-	WContainerWidget *second() { return second_; }
+	Wt::WContainerWidget *first() { return first_; }
+	Wt::WContainerWidget *second() { return second_; }
 private:
 	direction direction_;
 	std::string sizes_;
-	WContainerWidget *first_;
-	WContainerWidget *second_;
+	Wt::WContainerWidget *first_;
+	Wt::WContainerWidget *second_;
 };
+
+}
 
 }
 #endif

@@ -10,8 +10,8 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __WT_ALPHA_H__
-#define __WT_ALPHA_H__
+#ifndef __ALPHA_H__
+#define __ALPHA_H__
 
 #include <string>
 
@@ -26,9 +26,9 @@
 #include <Wt/WTable.h>
 #include <TML.h>
 
-#include "splitjs.h"
-#include "TML_editor.h"
-#include "workspace.h"
+#include "widget/splitjs.h"
+#include "widget/TML_editor.h"
+#include "widget/workspace.h"
 #include "driver.h"
 
 Wt::WString tr(std::string s);
@@ -37,41 +37,43 @@ typedef enum status_values { ERROR,
 } status;
 extern std::map<status_values, std::string> status_name;
 
-namespace Wt {
+namespace alpha {
 
-struct alpha : public WApplication {
-	alpha(const WEnvironment& env);
-	static int run(int argc, char** argv);
+std::string bin2hex(const std::string& bin);
+
+struct alpha : public Wt::WApplication {
+	alpha(const Wt::WEnvironment& env);
+	static int start(int argc, char** argv);
 private:
 	struct opts {
 		bool autorun = false;
 		bool linenumbers = true;
 	} o;
-	WContainerWidget *c_;
-	workspace *workspace_;
-	splitjs *wsc_;              // splits file tree and right part of UI
-	splitjs *sc_;               // splits editor and tabs under editor
-	TML_editor *editor_;        // editor
-	WTabWidget *tabs_;          // tabs under editor
-	TML_editor *output_;        // output tab
-	WContainerWidget *errors_;  // errors tab
-	WContainerWidget *info_;    // info tab
-	WContainerWidget *debug_;   // debug tab
-	WContainerWidget *tabular_; // tabular tab
-	WTabWidget *tabular_tabs_;  // tabular tabs with out tables
-	std::map<std::wstring, WTable*> tables_;
-	WContainerWidget *binary_;  // binary tab
-	WTemplate *sb_;             // status bar
+	Wt::WContainerWidget *c_;
+	widget::workspace *workspace_;
+	widget::splitjs *wsc_;          // splits file tree and right part of UI
+	widget::splitjs *sc_;           // splits editor and tabs under editor
+	widget::TML_editor *editor_;    // editor
+	Wt::WTabWidget *tabs_;          // tabs under editor
+	widget::TML_editor *output_;    // output tab
+	Wt::WContainerWidget *errors_;  // errors tab
+	Wt::WContainerWidget *info_;    // info tab
+	Wt::WContainerWidget *debug_;   // debug tab
+	Wt::WContainerWidget *tabular_; // tabular tab
+	Wt::WTabWidget *tabular_tabs_;  // tabular tabs with out tables
+	std::map<std::wstring, Wt::WTable*> tables_;
+	Wt::WContainerWidget *binary_;  // binary tab
+	Wt::WTemplate *sb_;             // status bar
 
-	WPushButton *run_btn_;
-	WPushButton *runjs_btn_;
-	WPushButton *add_btn_;
+	Wt::WPushButton *run_btn_;
+	Wt::WPushButton *runjs_btn_;
+	Wt::WPushButton *add_btn_;
 
-	JSignal<bool, double, std::string> result_;
-	JSignal<std::string> relation_ensure_;
-	JSignal<std::string, int, std::string> relation_set_;
-	JSignal<>output_finished_;
-	JSignal<std::string, std::string> set_tab_text_;
+	Wt::JSignal<bool, double, std::string> result_;
+	Wt::JSignal<std::string> relation_ensure_;
+	Wt::JSignal<std::string, int, std::string> relation_set_;
+	Wt::JSignal<>output_finished_;
+	Wt::JSignal<std::string, std::string> set_tab_text_;
 
 	status status_ = INIT;
 	bool changed_ = false;      // has source been changed since last run?
@@ -106,12 +108,11 @@ private:
 	void refresh_tabs();
 
 	// helpers
-	void add_text(WContainerWidget* w, const std::wstring& text);
-	void add_text(WContainerWidget* w, const std::string& text);
+	void add_text(Wt::WContainerWidget* w, const std::wstring& text);
+	void add_text(Wt::WContainerWidget* w, const std::string& text);
 	std::string serialize_result(driver &d);
 	void unserialize_result(driver &d, std::string bin);
-	WTable* get_table(std::wstring r);
-	std::string bin2hex(const std::string& bin) const;
+	Wt::WTable* get_table(std::wstring r);
 };
 
 }

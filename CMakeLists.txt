@@ -28,20 +28,20 @@ include(install_and_activate_emsdk)
 install_and_activate_emsdk(${EMSDK_DIR})
 
 set(ALPHA_HEADERS
-	src/Wt/alpha.h
-	src/Wt/codemirror.h
-	src/Wt/TML_editor.h
-	src/Wt/splitjs.h
-	src/Wt/workspace.h
-	src/Wt/file_item.h
+	src/alpha/alpha.h
+	src/alpha/widget/codemirror.h
+	src/alpha/widget/TML_editor.h
+	src/alpha/widget/splitjs.h
+	src/alpha/widget/workspace.h
+	src/alpha/widget/file_item.h
 )
 set(ALPHA_SOURCES
 	src/main.cpp
-	src/Wt/alpha.cpp
-	src/Wt/runtime.cpp
-	src/Wt/runtime_browser.cpp
-	src/Wt/workspace.cpp
-	src/Wt/file_item.cpp
+	src/alpha/alpha.cpp
+	src/alpha/runtime.cpp
+	src/alpha/runtime_browser.cpp
+	src/alpha/widget/workspace.cpp
+	src/alpha/widget/file_item.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"

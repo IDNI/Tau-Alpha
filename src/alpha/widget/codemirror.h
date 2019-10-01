@@ -10,8 +10,8 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __WT_CODEMIRROR_H__
-#define __WT_CODEMIRROR_H__
+#ifndef __CODEMIRROR_H__
+#define __CODEMIRROR_H__
 
 #include <Wt/WApplication.h>
 #include <Wt/WTextArea.h>
@@ -19,14 +19,16 @@
 #include <string>
 #include <sstream>
 
-namespace Wt {
+namespace alpha {
 
-class codemirror : public WContainerWidget {
-	WTextArea * textArea_;
-	JSignal<std::string> onUpdate_;
+namespace widget {
+
+class codemirror : public Wt::WContainerWidget {
+	Wt::WTextArea * textArea_;
+	Wt::JSignal<std::string> onUpdate_;
 public:
 	codemirror() : onUpdate_(this, "onUpdate") {
-		WApplication* app = WApplication::instance();
+		Wt::WApplication* app = Wt::WApplication::instance();
 		app->require(app->resolveRelativeUrl(
 			"resources/CodeMirror/lib/codemirror.js"));
 		// app->require(app->resolveRelativeUrl(
@@ -49,7 +51,7 @@ public:
 		// 	"resources/CodeMirror/addon/hint/show-hint.css"));
 		// app->useStyleSheet(app->resolveRelativeUrl(
 		// 	"resources/CodeMirror/addon/fold/foldgutter.css"));
-		textArea_ = this->addWidget(std::make_unique<WTextArea>());
+		textArea_ = this->addWidget(std::make_unique<Wt::WTextArea>());
 		textArea_->textInput().connect([this]{
 			std::stringstream js; js
 				<< "setTimeout (function() {\n"
@@ -119,8 +121,10 @@ public:
 		return textArea_->valueText().toUTF8();
 	}
 
-	JSignal<std::string>& onUpdate() { return onUpdate_; }
+	Wt::JSignal<std::string>& onUpdate() { return onUpdate_; }
 };
+
+}
 
 }
 #endif

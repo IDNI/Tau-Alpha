@@ -10,17 +10,19 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __WT_TML_EDITOR_H__
-#define __WT_TML_EDITOR_H__
+#ifndef __TML_EDITOR_H__
+#define __TML_EDITOR_H__
 
 #include "codemirror.h"
 
-namespace Wt {
+namespace alpha {
+
+namespace widget {
 
 class TML_editor : public codemirror {
 public:
 	TML_editor() {
-		WApplication* app = WApplication::instance();
+		Wt::WApplication* app = Wt::WApplication::instance();
 		app->require(app->resolveRelativeUrl(
 			"resources/codemirror_grammar/"
 						"codemirror_grammar.min.js"));
@@ -85,4 +87,7 @@ public:
 };
 
 }
+
+}
+
 #endif

@@ -11,11 +11,11 @@
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
 #include <locale.h>
-#include "Wt/alpha.h"
+#include "alpha/alpha.h"
 
 int main(int argc, char **argv) {
 	setlocale(LC_ALL, "");
 	bdd::init();
 	driver::init();
-	return Wt::alpha::run(argc, argv);
+	return alpha::alpha::start(argc, argv);
 }

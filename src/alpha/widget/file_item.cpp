@@ -12,9 +12,13 @@
 // modified over time by the Author.
 #include "file_item.h"
 
-namespace Wt {
+namespace alpha {
 
-const ItemDataRole file_item::FileNameRole = ItemDataRole::User;
-const ItemDataRole file_item::FilePathRole = ItemDataRole::User + 1;
+namespace widget {
+
+const Wt::ItemDataRole file_item::FileNameRole = Wt::ItemDataRole::User;
+const Wt::ItemDataRole file_item::FilePathRole = Wt::ItemDataRole::User + 1;
+
+}
 
 }

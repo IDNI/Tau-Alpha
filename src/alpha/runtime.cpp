@@ -12,6 +12,8 @@
 // modified over time by the Author.
 #include "alpha.h"
 
+namespace alpha {
+
 using namespace std;
 using namespace Wt;
 
@@ -118,4 +120,6 @@ std::string alpha::serialize_result(driver &d) {
 
 void alpha::unserialize_result(driver &d, std::string bin) {
 	std::istringstream is(bin); is >> d;
+}
+
 }

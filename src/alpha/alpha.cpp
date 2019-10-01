@@ -25,12 +25,13 @@ std::map<status_values, std::string> status_name = {
 	{CONTRADICTION, "contradiction"}
 };
 
-namespace Wt {
+namespace alpha {
 
+using namespace Wt;
 using std::make_unique;
 using std::string;
 
-int alpha::run(int argc, char** argv) {
+int alpha::start(int argc, char** argv) {
 	return WRun(argc, argv, [](const WEnvironment& env) {
 		return make_unique<alpha>(env);
 	});
@@ -41,8 +42,8 @@ alpha::alpha(const WEnvironment& env) :
 	result_(this, "result"),
 	relation_ensure_(this, "relation_ensure"),
 	relation_set_(this, "relation_out_set"),
-	set_tab_text_(this, "set_tab_text"),
-	output_finished_(this, "output_finished")
+	output_finished_(this, "output_finished"),
+	set_tab_text_(this, "set_tab_text")
 {
 	// addMetaHeader("viewport", "width=device-width, initial-scale=1");
 
@@ -83,13 +84,15 @@ alpha::alpha(const WEnvironment& env) :
 }
 
 void alpha::create_splitters_ui() {
-	wsc_ = c_->addWidget(make_unique<splitjs>(splitjs::direction::HORIZONTAL, "20,80"));
+	wsc_ = c_->addWidget(make_unique<widget::splitjs>(
+			widget::splitjs::direction::HORIZONTAL, "20,80"));
 	wsc_->addStyleClass("splitter_workspace");
-	workspace_ = wsc_->first()->addWidget(make_unique<workspace>("./workspace"));
-	sc_ = wsc_->second()->addWidget(make_unique<splitjs>());
+	workspace_ = wsc_->first()->addWidget(make_unique<widget::workspace>(
+		"./workspace"));
+	sc_ = wsc_->second()->addWidget(make_unique<widget::splitjs>());
 	sc_->addStyleClass("splitter_editor");
 
-	editor_ = sc_->first()->addWidget(make_unique<TML_editor>());
+	editor_ = sc_->first()->addWidget(make_unique<widget::TML_editor>());
 	auto c = sc_->second()->addWidget(make_unique<WContainerWidget>());
 	c->resize("100%", "100%");
 
@@ -98,7 +101,7 @@ void alpha::create_splitters_ui() {
 	//tabs_->resize(WLength(100, LengthUnit::Percentage), WLength(100, LengthUnit::Percentage));
 
 	// output tab
-	auto output = make_unique<TML_editor>();
+	auto output = make_unique<widget::TML_editor>();
 	output_ = output.get();
 	tabs_->addTab(move(output), "output");
 
@@ -175,8 +178,7 @@ void alpha::create_statusbar() {
 
 void alpha::refresh_tabs() {
 	tabs_->setCurrentIndex(tabs_->currentIndex());
-	if (tabs_->currentIndex() == tabs_->indexOf(tabular_))
-		tabular_tabs_->setCurrentIndex(tabular_tabs_->currentIndex());
+	tabular_tabs_->setCurrentIndex(tabular_tabs_->currentIndex());
 }
 
 void alpha::create_toolbar() {
@@ -232,7 +234,7 @@ WTable* alpha::get_table(std::wstring r) {
 	return it->second;
 }
 
-std::string alpha::bin2hex(const std::string& bin) const {
+std::string bin2hex(const std::string& bin) {
 	char h[100];
 	std::stringstream bs;
 	long n = 1;

@@ -12,6 +12,8 @@
 // modified over time by the Author.
 #include "alpha.h"
 
+namespace alpha {
+
 using namespace std;
 using namespace Wt;
 
@@ -36,7 +38,7 @@ void alpha::run_tml_js() {
 	before_run();
 	if (!set_tab_text_.isConnected()) set_tab_text_.connect(
 		[this](std::string tab, std::string text) {
-			WContainerWidget *t;
+			WContainerWidget *t = 0;
 			if (tab == "debug") t = debug_;
 			else if (tab == "info") t = info_;
 			else if (tab == "error") t = errors_;
@@ -143,4 +145,6 @@ void alpha::run_tml_js() {
 	<< "bdd.gc();\n";
 	Wt::log("info") << js.str();
 	this->doJavaScript(js.str());
+}
+
 }

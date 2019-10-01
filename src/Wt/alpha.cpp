@@ -38,7 +38,11 @@ int alpha::run(int argc, char** argv) {
 
 alpha::alpha(const WEnvironment& env) :
 	WApplication(env),
-	result_(this, "result")
+	result_(this, "result"),
+	relation_ensure_(this, "relation_ensure"),
+	relation_set_(this, "relation_out_set"),
+	set_tab_text_(this, "set_tab_text"),
+	output_finished_(this, "output_finished")
 {
 	// addMetaHeader("viewport", "width=device-width, initial-scale=1");
 
@@ -111,11 +115,11 @@ void alpha::create_splitters_ui() {
 	// WAnimation animation(AnimationEffect::SlideInFromLeft, TimingFunction::EaseIn);
 	// tabular_tabs_->contentsStack()->setTransitionAnimation(animation, true);
 
-	// // binary tab
-	// auto binary = make_unique<WContainerWidget>();
-	// binary_ = binary.get();
-	// binary_->addStyleClass("text-tab binary-tab");
-	// tabs_->addTab(move(binary), "bin");
+	// binary tab
+	auto binary = make_unique<WContainerWidget>();
+	binary_ = binary.get();
+	binary_->addStyleClass("text-tab binary-tab");
+	tabs_->addTab(move(binary), "bin");
 
 	// info tab
 	auto info = make_unique<WContainerWidget>();
@@ -169,11 +173,20 @@ void alpha::create_statusbar() {
 	elapsed(0);
 }
 
+void alpha::refresh_tabs() {
+	tabs_->setCurrentIndex(tabs_->currentIndex());
+	if (tabs_->currentIndex() == tabs_->indexOf(tabular_))
+		tabular_tabs_->setCurrentIndex(tabular_tabs_->currentIndex());
+}
+
 void alpha::create_toolbar() {
 	auto tb = c_->addWidget(make_unique<WToolBar>());
 #ifndef DISABLE_SERVER_EVALUATION
 	auto run_btn = make_unique<WPushButton>(tr("RUN"));
-	run_btn->clicked().connect([this]{ run_tml(); });
+	run_btn->clicked().connect([this]{
+		run_tml();
+		refresh_tabs();
+	});
 	run_btn_ = run_btn.get();
 	tb->addButton(move(run_btn));
 #endif
@@ -198,6 +211,39 @@ void alpha::add_text(WContainerWidget* w, const std::string& text) {
 
 void alpha::add_text(WContainerWidget* w, const std::wstring& text) {
 	add_text(w, ws2s(text));
+}
+
+WTable* alpha::get_table(std::wstring r) {
+	auto it = tables_.find(r);
+	WTable *table;
+	if (it == tables_.end()) {
+		auto new_table = make_unique<WTable>();
+		table = new_table.get();
+		table->setWidth("100%");
+		table->addStyleClass("tabular-tabs");
+		table->addStyleClass("table-hover");
+		table->addStyleClass("table-condensed");
+		table->addStyleClass("table-striped");
+		tables_[r] = table;
+		auto item = tabular_tabs_->addTab(move(new_table), r);
+		item->addStyleClass("tabular-row");
+		return table;
+	}
+	return it->second;
+}
+
+std::string alpha::bin2hex(const std::string& bin) const {
+	char h[100];
+	std::stringstream bs;
+	long n = 1;
+	for (unsigned char b : bin) {
+		sprintf(h, "%02x", b);
+		bs << h << " ";
+		if (!(n % 4) && n % 32) bs << " ";
+		if (!(n % 32) ) bs << "\n";
+		++n;
+	}
+	return bs.str();
 }
 
 }

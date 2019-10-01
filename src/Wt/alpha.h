@@ -29,6 +29,7 @@
 #include "splitjs.h"
 #include "TML_editor.h"
 #include "workspace.h"
+#include "driver.h"
 
 Wt::WString tr(std::string s);
 typedef enum status_values { ERROR,
@@ -59,14 +60,18 @@ private:
 	WContainerWidget *tabular_; // tabular tab
 	WTabWidget *tabular_tabs_;  // tabular tabs with out tables
 	std::map<std::wstring, WTable*> tables_;
-	//WContainerWidget *binary_;  // binary tab
+	WContainerWidget *binary_;  // binary tab
 	WTemplate *sb_;             // status bar
 
 	WPushButton *run_btn_;
 	WPushButton *runjs_btn_;
 	WPushButton *add_btn_;
 
-	JSignal<bool, double> result_;
+	JSignal<bool, double, std::string> result_;
+	JSignal<std::string> relation_ensure_;
+	JSignal<std::string, int, std::string> relation_set_;
+	JSignal<>output_finished_;
+	JSignal<std::string, std::string> set_tab_text_;
 
 	status status_ = INIT;
 	bool changed_ = false;      // has source been changed since last run?
@@ -98,12 +103,15 @@ private:
 		sb_->bindString("status", tr(status_name[status_]));
 		sb_->bindInt("elapsed", 0);
 	}
+	void refresh_tabs();
 
 	// helpers
 	void add_text(WContainerWidget* w, const std::wstring& text);
 	void add_text(WContainerWidget* w, const std::string& text);
-	//std::string serialize_result(driver &d);
-	//void unserialize_result(driver &d, std::string bin);
+	std::string serialize_result(driver &d);
+	void unserialize_result(driver &d, std::string bin);
+	WTable* get_table(std::wstring r);
+	std::string bin2hex(const std::string& bin) const;
 };
 
 }

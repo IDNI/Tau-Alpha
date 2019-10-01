@@ -39,6 +39,7 @@ set(ALPHA_SOURCES
 	src/main.cpp
 	src/Wt/alpha.cpp
 	src/Wt/runtime.cpp
+	src/Wt/runtime_browser.cpp
 	src/Wt/workspace.cpp
 	src/Wt/file_item.cpp
 )

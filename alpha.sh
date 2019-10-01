@@ -1,9 +1,10 @@
 #!/bin/bash
 
+if [ -f ./submodules/emsdk/emsdk_env.sh ]; then
+	source ./submodules/emsdk/emsdk_env.sh
+fi
+
 if [ ! -f ./build-Release/alpha ]; then
-	if [ -f /emsdk/emsdk_env.sh ]; then
-		source /emsdk/emsdk_env.sh
-	fi
 	./release.sh
 fi
 

@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 project(alpha)
 
 ################################################################################
-option(ENABLE_LOCAL_EVALUATION "Enable local evaluation" ON)
-option(DISABLE_SERVER_EVALUATION "Forbid evaluation on the server" OFF)
+option(ENABLE_FRONTEND_EXECUTION "Enable executing of TML in a browser." ON)
+option(DISABLE_BACKEND_EXECUTION "Disable executing of TML remotely over the ba\
+ckend" OFF)
 ################################################################################
 
 set(CMAKE_VERBOSE_MAKEFILE true)
@@ -33,8 +34,8 @@ set(ALPHA_HEADERS
 set(ALPHA_SOURCES
 	src/main.cpp
 	src/alpha/alpha.cpp
-	src/alpha/runtime.cpp
-	src/alpha/runtime_browser.cpp
+	src/alpha/runtime_backend.cpp
+	src/alpha/runtime_frontend.cpp
 	src/alpha/widget/workspace.cpp
 	src/alpha/widget/file_item.cpp
 )
@@ -76,7 +77,7 @@ set(EMSCRIPTEN_DIR "${EMSDK_DIR}/fastcomp/emscripten")
 list(APPEND CMAKE_MODULE_PATH ${TML_DIR}/cmake)
 include(emscripten_toolchain)
 emscripten_toolchain_available(EMSCRIPTEN_TOOLCHAIN_AVAILABLE)
-if(ENABLE_LOCAL_EVALUATION)
+if(ENABLE_FRONTEND_EXECUTION)
 	if(${EMSCRIPTEN_TOOLCHAIN_AVAILABLE})
 		include(add_tml_js_lib)
 		add_tml_js_lib()
@@ -113,9 +114,9 @@ target_link_libraries(alpha
 	wt wthttp
 )
 
-if(NOT ENABLE_LOCAL_EVALUATION)
-	target_compile_definitions(alpha PRIVATE "DISABLE_LOCAL_EVALUATION=1")
+if(NOT ENABLE_FRONTEND_EXECUTION)
+	target_compile_definitions(alpha PRIVATE "DISABLE_FRONTEND_EXECUTION=1")
 endif()
-if(DISABLE_SERVER_EVALUATION)
-	target_compile_definitions(alpha PRIVATE "DISABLE_SERVER_EVALUATION=1")
+if(DISABLE_BACKEND_EXECUTION)
+	target_compile_definitions(alpha PRIVATE "DISABLE_BACKEND_EXECUTION=1")
 endif()

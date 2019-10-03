@@ -17,37 +17,21 @@ namespace alpha {
 using namespace std;
 using namespace Wt;
 
-void alpha::before_run() {
-	update_status(RUNNING);
-	not_changed();
-	output_->setText("");
-	info_->clear();
-	errors_->clear();
-	binary_->clear();
-	DBG(debug_->clear();)
-	while (tabular_tabs_->count() > 0) {
-		tabular_tabs_->setCurrentIndex(0);
-		tabular_tabs_->removeTab(tabular_tabs_->currentWidget());
-	}
-	tables_.clear();
-}
-
-void alpha::run_tml() {
-	run_tml(editor_->getText());
-}
-
-unsigned long run_tml_counter = 0;
-void alpha::run_tml(string prog) {
-	unsigned long id = ++run_tml_counter;
-	Wt::log("info")<<"TML(" << id << ") run";
-	run_btn_->disable();
+unsigned long runtime_backend_counter = 0;
+void alpha::runtime_backend(string prog) {
+#ifdef DISABLE_BACKEND_EXECUTION
+	return;
+#endif
+	unsigned long id = ++runtime_backend_counter;
+	Wt::log("info")<<"TML(" << id << ") backend run";
+	run_backend_btn_->disable();
 	std::vector<string> args = {
 		"--output",      "@buffer",
 		"--error",       "@buffer",
 		"--info",        "@buffer",
 		"--debug",       "@buffer"
 	};
-	before_run();
+	runtime_before();
 
 	clock_t start = clock(), end;
 	driver d(s2ws(prog), ::options(args));
@@ -108,9 +92,12 @@ void alpha::run_tml(string prog) {
 	Wt::log("info")<<"TML(" << id << ") " << status_name[status_]
 	<< " - elapsed: " << e << " ms";
 	elapsed(e);
-	run_btn_->enable();
+
+	run_backend_btn_->enable();
 
 	//DBG(unserialize_result(d, bin);)
+
+	runtime_after();
 }
 
 std::string alpha::serialize_result(driver &d) {

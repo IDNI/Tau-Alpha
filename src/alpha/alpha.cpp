@@ -50,7 +50,7 @@ alpha::alpha(const WEnvironment& env) :
 	// load messages from alpha.xml
 	messageResourceBundle().use("messages/alpha", false);
 
-	load_tml_js();
+	runtime_frontend_load();
 
 	// setup title, show title in header and add container c_ (div)
 	WString title = tr("Tau Alpha");
@@ -67,8 +67,16 @@ alpha::alpha(const WEnvironment& env) :
 
 	editor_->setOption("lineNumbers", "'true'");
 	editor_->onUpdate().connect([this](std::string prog){
-		if (o.autorun) run_tml(prog), bdd::gc();
-		else changed();
+		if (o.autorun) {
+#ifndef DISABLE_FRONTEND_EXECUTION
+			runtime_frontend();
+#else
+#	ifndef DISABLE_BACKEND_EXECUTION
+			runtime_backend();
+			bdd::gc();
+#	endif
+#endif
+		} else changed();
 	});
 	output_->setOption("readOnly", "'nocursor'");
 
@@ -183,20 +191,17 @@ void alpha::refresh_tabs() {
 
 void alpha::create_toolbar() {
 	auto tb = c_->addWidget(make_unique<WToolBar>());
-#ifndef DISABLE_SERVER_EVALUATION
-	auto run_btn = make_unique<WPushButton>(tr("RUN"));
-	run_btn->clicked().connect([this]{
-		run_tml();
-		refresh_tabs();
-	});
-	run_btn_ = run_btn.get();
-	tb->addButton(move(run_btn));
+#ifndef DISABLE_BACKEND_EXECUTION
+	auto btn = make_unique<WPushButton>(tr("RUN"));
+	btn->clicked().connect([this]{ runtime_backend(); });
+	run_backend_btn_ = btn.get();
+	tb->addButton(move(btn));
 #endif
-#ifndef DISABLE_LOCAL_EVALUATION
-	auto runjs_btn = make_unique<WPushButton>(tr("RUN JS"));
-	runjs_btn->clicked().connect([this]{ run_tml_js(); });
-	runjs_btn_ = runjs_btn.get();
-	tb->addButton(move(runjs_btn));
+#ifndef DISABLE_FRONTEND_EXECUTION
+	btn = make_unique<WPushButton>(tr("RUN JS"));
+	btn->clicked().connect([this]{ runtime_frontend(); });
+	run_frontend_btn_ = btn.get();
+	tb->addButton(move(btn));
 #endif
 }
 
@@ -232,6 +237,19 @@ WTable* alpha::get_table(std::wstring r) {
 		return table;
 	}
 	return it->second;
+}
+
+void alpha::runtime_clear() {
+	output_->setText("");
+	info_->clear();
+	errors_->clear();
+	binary_->clear();
+	DBG(debug_->clear();)
+	while (tabular_tabs_->count() > 0) {
+		tabular_tabs_->setCurrentIndex(0);
+		tabular_tabs_->removeTab(tabular_tabs_->currentWidget());
+	}
+	tables_.clear();
 }
 
 std::string bin2hex(const std::string& bin) {

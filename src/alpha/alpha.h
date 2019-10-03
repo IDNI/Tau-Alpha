@@ -49,6 +49,10 @@ private:
 		bool autorun = false;
 		bool linenumbers = true;
 	} o;
+
+	status status_ = INIT;
+	bool changed_ = false;      // has source been changed since last run?
+
 	Wt::WContainerWidget *c_;
 	widget::workspace *workspace_;
 	widget::splitjs *wsc_;          // splits file tree and right part of UI
@@ -65,8 +69,8 @@ private:
 	Wt::WContainerWidget *binary_;  // binary tab
 	Wt::WTemplate *sb_;             // status bar
 
-	Wt::WPushButton *run_btn_;
-	Wt::WPushButton *runjs_btn_;
+	Wt::WPushButton *run_backend_btn_;
+	Wt::WPushButton *run_frontend_btn_;
 	Wt::WPushButton *add_btn_;
 
 	Wt::JSignal<bool, double, std::string> result_;
@@ -75,19 +79,22 @@ private:
 	Wt::JSignal<>output_finished_;
 	Wt::JSignal<std::string, std::string> set_tab_text_;
 
-	status status_ = INIT;
-	bool changed_ = false;      // has source been changed since last run?
-
-	void load_tml_js();
 	void create_menu();
 	void create_toolbar();
 	void create_splitters_ui();
 	void create_statusbar();
 
-	void before_run();
-	void run_tml();
-	void run_tml(std::string prog);
-	void run_tml_js();
+	void runtime_clear();
+	void runtime_frontend_load();
+	void runtime_before() {
+		runtime_clear();
+		update_status(RUNNING);
+		not_changed();
+	};
+	void runtime_frontend();
+	void runtime_backend() { runtime_backend(editor_->getText()); }
+	void runtime_backend(std::string prog);
+	void runtime_after() { refresh_tabs(); };
 
 	void log(std::string message) { alpha::log("info", message); }
 	void log(std::string level, std::string message);

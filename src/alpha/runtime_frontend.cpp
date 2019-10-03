@@ -17,7 +17,10 @@ namespace alpha {
 using namespace std;
 using namespace Wt;
 
-void alpha::load_tml_js() {
+void alpha::runtime_frontend_load() {
+#ifdef DISABLE_FRONTEND_EXECUTION
+	return;
+#endif
 	WApplication* app = WApplication::instance();
 	app->require(app->resolveRelativeUrl("tml.js"));
 	stringstream js;
@@ -30,12 +33,15 @@ void alpha::load_tml_js() {
 	Wt::log("info") << "loaded";
 }
 
-unsigned long run_tml_js_counter = 0;
-void alpha::run_tml_js() {
-	unsigned long id = ++run_tml_js_counter;
-	Wt::log("info")<<"TML.js(" << id << ") run";
-	runjs_btn_->disable();
-	before_run();
+unsigned long runtime_frontend_counter = 0;
+void alpha::runtime_frontend() {
+#ifdef DISABLE_FRONTEND_EXECUTION
+	return;
+#endif
+	unsigned long id = ++runtime_frontend_counter;
+	Wt::log("info")<<"TML.js(" << id << ") frontend run";
+	run_frontend_btn_->disable();
+	runtime_before();
 	if (!set_tab_text_.isConnected()) set_tab_text_.connect(
 		[this](std::string tab, std::string text) {
 			WContainerWidget *t = 0;
@@ -72,7 +78,7 @@ void alpha::run_tml_js() {
 			Wt::log("info") << js.str();
 			this->doJavaScript(js.str());
 			output_->sync();
-			runjs_btn_->enable();
+			run_frontend_btn_->enable();
 		});
 	if (!relation_ensure_.isConnected()) relation_ensure_.connect(
 		[this](string r) { get_table(s2ws(r)); });
@@ -88,7 +94,7 @@ void alpha::run_tml_js() {
 			table->elementAt(row, col++)->addNew<WText>(val);
 		});
 	if (!output_finished_.isConnected()) output_finished_.connect([this]() {
-		refresh_tabs();
+		runtime_after();
 	});
 	stringstream js;
 	js
@@ -140,9 +146,9 @@ void alpha::run_tml_js() {
 	<< "	const tc = new tabular_collector_" << id << "();" << "\n"
 	<< "	d.out(tc); tc.rels = {};" << "\n"
 	<< "}" << "\n"
-	<< output_finished_.createCall({}) << "\n"
 	<< "d.delete(); o.delete(); as.delete();\n"
-	<< "bdd.gc();\n";
+	<< "bdd.gc();\n"
+	<< output_finished_.createCall({}) << "\n";
 	Wt::log("info") << js.str();
 	this->doJavaScript(js.str());
 }

@@ -65,9 +65,9 @@ set(Wt_HTTP_LIBRARY ${Wt_LIBRARY_DIR}/libwthttp.a)
 
 # TML
 add_subdirectory(${TML_DIR})
-set_target_properties(tml TML PROPERTIES
-	EXCLUDE_FROM_ALL 1 # do not build tml executable by default
-	EXCLUDE_FROM_DEFAULT_BUILD 1) # ... library is enough
+set_target_properties(tml TMLso PROPERTIES
+	EXCLUDE_FROM_ALL 1 # do not build tml executable and so by default
+	EXCLUDE_FROM_DEFAULT_BUILD 1) # ... static library is enough
 
 add_executable(alpha)
 

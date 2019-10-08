@@ -107,8 +107,6 @@ target_link_libraries(alpha
 	${Wt_HTTP_LIBRARY}
 	pthread
 	z
-	boost_program_options boost_thread boost_atomic
-	boost_system boost_filesystem boost_chrono boost_date_time
 	wt wthttp
 )
 

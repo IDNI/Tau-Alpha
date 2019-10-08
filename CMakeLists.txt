@@ -73,7 +73,7 @@ set_target_properties(tml TMLso PROPERTIES
 add_executable(alpha)
 
 # add tml.js if emscripten available
-set(EMSCRIPTEN_DIR "${EMSDK_DIR}/fastcomp/emscripten")
+set(EMSCRIPTEN_DIR "${EMSDK_DIR}/fastcomp/emscripten" CACHE STRING "")
 list(APPEND CMAKE_MODULE_PATH ${TML_DIR}/cmake)
 include(emscripten_toolchain)
 emscripten_toolchain_available(EMSCRIPTEN_TOOLCHAIN_AVAILABLE)
@@ -90,21 +90,19 @@ endif()
 target_setup(alpha)
 target_sources(alpha PRIVATE ${ALPHA_SOURCES} ${ALPHA_HEADERS})
 target_include_directories(alpha PRIVATE ${ZLIB_INCLUDE_DIR})
-target_include_directories(alpha PRIVATE ${BOOST_ROOT})
 target_include_directories(alpha PRIVATE ${Wt_INCLUDE_DIR})
 target_link_directories(alpha PRIVATE ${ZLIB_DIR})
-target_link_directories(alpha PRIVATE ${BOOST_ROOT}/lib)
 target_link_directories(alpha PRIVATE ${Wt_LIBRARY_DIR})
 target_link_libraries(alpha
 	TMLs
 	${ZLIB_LIBRARY}
-	${BOOST_ROOT}/lib/libboost_program_options.a
-	${BOOST_ROOT}/lib/libboost_thread.a
-	${BOOST_ROOT}/lib/libboost_atomic.a
-	${BOOST_ROOT}/lib/libboost_system.a
-	${BOOST_ROOT}/lib/libboost_filesystem.a
-	${BOOST_ROOT}/lib/libboost_chrono.a
-	${BOOST_ROOT}/lib/libboost_date_time.a
+	boost_program_options
+	boost_thread
+	boost_atomic
+	boost_system
+	boost_filesystem
+	boost_chrono
+	boost_date_time
 	${Wt_LIBRARY}
 	${Wt_HTTP_LIBRARY}
 	pthread

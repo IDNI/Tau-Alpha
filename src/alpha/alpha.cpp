@@ -192,16 +192,16 @@ void alpha::refresh_tabs() {
 void alpha::create_toolbar() {
 	auto tb = c_->addWidget(make_unique<WToolBar>());
 #ifndef DISABLE_BACKEND_EXECUTION
-	auto btn = make_unique<WPushButton>(tr("RUN"));
-	btn->clicked().connect([this]{ runtime_backend(); });
-	run_backend_btn_ = btn.get();
-	tb->addButton(move(btn));
+	auto bbtn = make_unique<WPushButton>(tr("RUN"));
+	bbtn->clicked().connect([this]{ runtime_backend(); });
+	run_backend_btn_ = bbtn.get();
+	tb->addButton(move(bbtn));
 #endif
 #ifndef DISABLE_FRONTEND_EXECUTION
-	btn = make_unique<WPushButton>(tr("RUN JS"));
-	btn->clicked().connect([this]{ runtime_frontend(); });
-	run_frontend_btn_ = btn.get();
-	tb->addButton(move(btn));
+	auto fbtn = make_unique<WPushButton>(tr("RUN JS"));
+	fbtn->clicked().connect([this]{ runtime_frontend(); });
+	run_frontend_btn_ = fbtn.get();
+	tb->addButton(move(fbtn));
 #endif
 }
 

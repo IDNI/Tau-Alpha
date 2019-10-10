@@ -10,41 +10,39 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __ALPHA_H__
-#define __ALPHA_H__
-
-#include <string>
+#ifndef __ALPHA_WIDGET_AGENT_VIEW_H__
+#define __ALPHA_WIDGET_AGENT_VIEW_H__
 
 #include <Wt/WApplication.h>
-#include <Wt/WString.h>
 #include <Wt/WTemplate.h>
-#include <Wt/WPopupMenu.h>
-#include <Wt/WPushButton.h>
-#include <Wt/WToolBar.h>
-#include <Wt/WJavaScript.h>
-#include <Wt/WTabWidget.h>
-#include <Wt/WTable.h>
-#include <TML.h>
+#include <Wt/WText.h>
 
-#include "widget/splitjs.h"
-#include "widget/TML_editor.h"
-#include "widget/workspace.h"
-#include "driver.h"
+#include "../agent.h"
 
 namespace alpha {
 
-Wt::WString tr(std::string s);
+namespace widget {
 
-struct alpha : public Wt::WApplication {
-	alpha(const Wt::WEnvironment& env);
-	static int start(int argc, char** argv);
-private:
-	void create_views();
-	void log(std::string message) { alpha::log("info", message); }
-	void log(std::string level, std::string message) {
-		Wt::log(level) << message;
+class agent_view : public Wt::WTemplate {
+	agent a;
+public:
+	agent_view(agent a) : a(a) {
+		Wt::WApplication *app = Wt::WApplication::instance();
+		app->messageResourceBundle().use("messages/agent");
+		addStyleClass("agent");
+		render();
+	}
+	void render() {
+		setTemplateText(tr("agent"));
+		bindWidget("id", std::make_unique<Wt::WText>(a.id()));
+		bindWidget("name", std::make_unique<Wt::WText>(a.name()));
+		bindWidget("other_name",
+			std::make_unique<Wt::WText>(a.other_name()));
 	}
 };
 
 }
+
+}
+
 #endif

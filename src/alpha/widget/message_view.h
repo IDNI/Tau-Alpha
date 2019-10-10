@@ -10,41 +10,39 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __ALPHA_H__
-#define __ALPHA_H__
-
-#include <string>
+#ifndef __ALPHA_WIDGET_MESSAGE_VIEW_H__
+#define __ALPHA_WIDGET_MESSAGE_VIEW_H__
 
 #include <Wt/WApplication.h>
-#include <Wt/WString.h>
 #include <Wt/WTemplate.h>
-#include <Wt/WPopupMenu.h>
-#include <Wt/WPushButton.h>
-#include <Wt/WToolBar.h>
-#include <Wt/WJavaScript.h>
-#include <Wt/WTabWidget.h>
-#include <Wt/WTable.h>
-#include <TML.h>
+#include <Wt/WText.h>
 
-#include "widget/splitjs.h"
-#include "widget/TML_editor.h"
-#include "widget/workspace.h"
-#include "driver.h"
+#include "../message.h"
 
 namespace alpha {
 
-Wt::WString tr(std::string s);
+namespace widget {
 
-struct alpha : public Wt::WApplication {
-	alpha(const Wt::WEnvironment& env);
-	static int start(int argc, char** argv);
-private:
-	void create_views();
-	void log(std::string message) { alpha::log("info", message); }
-	void log(std::string level, std::string message) {
-		Wt::log(level) << message;
+class message_view : public Wt::WTemplate {
+	message m;
+public:
+	message_view(message m) : m(m) {
+		Wt::WApplication *app = Wt::WApplication::instance();
+		app->messageResourceBundle().use("messages/message");
+		addStyleClass("message");
+		render();
+
+	}
+	void render() {
+		setTemplateText(tr("message"));
+		bindWidget("author",  std::make_unique<Wt::WText>(m.author()));
+		bindWidget("title",   std::make_unique<Wt::WText>(m.title()));
+		bindWidget("content", std::make_unique<Wt::WText>(m.content()));
 	}
 };
 
 }
+
+}
+
 #endif

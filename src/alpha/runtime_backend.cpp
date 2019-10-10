@@ -10,7 +10,7 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#include "alpha.h"
+#include "widget/ide.h"
 
 namespace alpha {
 
@@ -18,7 +18,7 @@ using namespace std;
 using namespace Wt;
 
 unsigned long runtime_backend_counter = 0;
-void alpha::runtime_backend(string prog) {
+void ide::runtime_backend(string prog) {
 #ifdef DISABLE_BACKEND_EXECUTION
 	return;
 #endif
@@ -89,7 +89,7 @@ void alpha::runtime_backend(string prog) {
 	add_text(errors_, ::output::read(L"error"));
 
 	double e = 1000 * double(end - start) / CLOCKS_PER_SEC;
-	Wt::log("info")<<"TML(" << id << ") " << status_name[status_]
+	Wt::log("info")<<"TML(" << id << ") " << ide::status_name[status_]
 	<< " - elapsed: " << e << " ms";
 	elapsed(e);
 
@@ -100,12 +100,12 @@ void alpha::runtime_backend(string prog) {
 	runtime_after();
 }
 
-std::string alpha::serialize_result(driver &d) {
+std::string ide::serialize_result(driver &d) {
 	std::stringstream bs; bs << d;
 	return bs.str();
 }
 
-void alpha::unserialize_result(driver &d, std::string bin) {
+void ide::unserialize_result(driver &d, std::string bin) {
 	std::istringstream is(bin); is >> d;
 }
 

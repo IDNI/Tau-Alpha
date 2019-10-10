@@ -10,14 +10,14 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#include "alpha.h"
+#include "widget/ide.h"
 
 namespace alpha {
 
 using namespace std;
 using namespace Wt;
 
-void alpha::runtime_frontend_load() {
+void ide::runtime_frontend_load() {
 #ifdef DISABLE_FRONTEND_EXECUTION
 	return;
 #endif
@@ -34,7 +34,7 @@ void alpha::runtime_frontend_load() {
 }
 
 unsigned long runtime_frontend_counter = 0;
-void alpha::runtime_frontend() {
+void ide::runtime_frontend() {
 #ifdef DISABLE_FRONTEND_EXECUTION
 	return;
 #endif

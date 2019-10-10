@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<messages>
+	<message id="channel">
+		<h2 class="channel-title">${title}</h2>
+		<div class="channel-op">by ${op}</div>
+		<div class="channel-messages">${messages}</div>
+	</message>
+</messages>

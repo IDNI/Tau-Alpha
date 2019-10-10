@@ -25,17 +25,26 @@ install_and_activate_emsdk(${EMSDK_DIR})
 
 set(ALPHA_HEADERS
 	src/alpha/alpha.h
+	src/alpha/message.h
+	src/alpha/channel.h
+	src/alpha/agent.h
+	src/alpha/protocol.h
 	src/alpha/widget/codemirror.h
 	src/alpha/widget/TML_editor.h
 	src/alpha/widget/splitjs.h
 	src/alpha/widget/workspace.h
 	src/alpha/widget/file_item.h
+	src/alpha/widget/ide.h
+	src/alpha/widget/message_view.h
+	src/alpha/widget/channel_view.h
+	src/alpha/widget/agent_view.h
 )
 set(ALPHA_SOURCES
 	src/main.cpp
 	src/alpha/alpha.cpp
 	src/alpha/runtime_backend.cpp
 	src/alpha/runtime_frontend.cpp
+	src/alpha/widget/ide.cpp
 	src/alpha/widget/workspace.cpp
 	src/alpha/widget/file_item.cpp
 )

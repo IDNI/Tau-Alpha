@@ -290,3 +290,23 @@ button
 	margin: 1px;
 	padding: 0;
 }
+
+
+
+
+div.message {
+	margin: 5px 0 10px 0;
+	border: 2px solid gray;
+}
+
+div.agent {
+	border: 3px solid green;
+}
+
+div.channel {
+	border: 2px solid pink;
+}
+
+
+
+

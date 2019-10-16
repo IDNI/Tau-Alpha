@@ -10,7 +10,6 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-//#include <iomanip>
 #include <Wt/WServer.h>
 #include <Wt/WApplication.h>
 #include <Wt/WTabWidget.h>
@@ -81,10 +80,10 @@ alpha::alpha(const WEnvironment& env) : WApplication(env) {
 }
 
 void alpha::create_views() {
-	root()->addWidget(make_unique<widget::agent_view>(
-		agent{"007", "Bond", "James Bond"}));
-	root()->addWidget(make_unique<widget::channel_view>(
-		channel{ "0", "admin", "general", 0 }));
+	//root()->addWidget(make_unique<widget::agent_view>(
+	//	agent{"007", "Bond", "James Bond"}));
+	//root()->addWidget(make_unique<widget::channel_view>(
+	//	channel{ "0", "admin", "general", 0 }));
 }
 
 }

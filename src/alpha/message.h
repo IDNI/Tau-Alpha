@@ -18,20 +18,20 @@
 namespace alpha {
 
 struct message {
-	message_id id_;
-	agent_id author_;
-	std::vector<channel_id> targets_;
-	std::string title_;
-	file content_;
-//	file formal_;
-//	timestamp created_;
-//	timestamp publish_;
-//	timestamp valid_;
-//	std::vector<message_id> reacts_to_;
-	agent_id author() const { return author_; }
-	std::string title() const { return title_; }
-	std::string content() const { return content_; }
+	message_id id;
+	agent_id author;
+	channel_ids targets;
+	std::string subject;
+	file content;
+//	file formal;
+//	timestamp created;
+//	timestamp publish;
+//	timestamp valid;
+//	message_ids reacts_to;
+	message() {};
 };
+
+std::ostream& operator<<(std::ostream& os, const message& m);
 
 }
 

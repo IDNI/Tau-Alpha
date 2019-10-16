@@ -64,7 +64,7 @@ function(build_wt)
 			WORKING_DIRECTORY ${WT_BUILD_DIR}
 		)
 		execute_process(
-			COMMAND make wthttp -j5
+			COMMAND make wt wthttp
 			WORKING_DIRECTORY ${WT_BUILD_DIR}
 		)
 		execute_process(

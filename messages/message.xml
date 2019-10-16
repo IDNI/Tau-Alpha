@@ -2,7 +2,7 @@
 <messages>
 	<message id="message">
 		<h3 class="message-title">${title}</h3>
-		<div class="message-author">by ${author}</div>
+		<div class="message-author">${author}</div>
 		<div class="message-content">${content}</div>
 	</message>
 </messages>

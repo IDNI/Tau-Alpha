@@ -12,10 +12,12 @@
 // modified over time by the Author.
 #ifndef __ALPHA_DEFS_H__
 #define __ALPHA_DEFS_H__
+
 #include <stdint.h>
 #include <string>
 #include <vector>
 #include <array>
+#include <iostream>
 
 namespace alpha {
 
@@ -28,9 +30,18 @@ typedef std::string cryptographic_id;
 typedef unique_id agent_id;
 typedef unique_id message_id;
 typedef unique_id channel_id;
+typedef unique_id session_id;
 typedef file picture;                 // or IRI? (file:///home/user/pic.jpg)
 typedef file custom_id;               // or IRI?
 typedef std::vector<custom_id> custom_ids;
+
+typedef std::vector<channel_id> channel_ids;
+typedef std::vector<agent_id> agent_ids;
+typedef std::vector<message_id> message_ids;
+
+typedef std::vector<std::string> strings;
+
+std::ostream& operator<<(std::ostream& os, const strings& strs);
 
 }
 

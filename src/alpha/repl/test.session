@@ -1,0 +1,28 @@
+register foo bar baz
+register joe pass jo
+
+login 2 pass
+
+create_channel general
+create_channel devel
+
+send 1 test11
+send 1 test12
+send 2 test21
+send 1 test13
+send 2 test22
+send 3 test31
+
+qa
+qch
+qm
+
+qa id 2
+qa name jo
+qa other_name az
+
+qch name gene
+qch id 2
+
+qm target 1
+qm author 1

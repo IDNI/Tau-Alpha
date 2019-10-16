@@ -18,18 +18,21 @@
 namespace alpha {
 
 struct agent {
-	agent_id         id_;
-//	cryptographic_id identity_;
-//	picture          picture_;
-	std::string      name_;       // username
-	std::string      other_name_; // real/other name
-//	std::string      email_;
-//	std::string      about_;
-//	custom_ids       custom_ids_;
-	agent_id id() { return id_; }
-	std::string name() { return name_; }
-	std::string other_name() { return other_name_; }
+	agent_id         id{0};
+//	cryptographic_id identity;
+//	picture          picture;
+	std::string      name;       // username
+	std::string      password;
+	std::string      other_name; // real/other name
+//	std::string      email;
+//	std::string      about;
+//	custom_ids       custom_ids;
+	agent() {};
+	agent(std::string name, std::string password, std::string other_name="")
+		: name(name), password(password), other_name(other_name) {};
 };
+
+std::ostream& operator<<(std::ostream& os, const agent& a);
 
 }
 

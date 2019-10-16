@@ -10,6 +10,9 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
+#ifndef __ALPHA_PROTOCOL_H__
+#define __ALPHA_PROTOCOL_H__
+
 #include "defs.h"
 #include "agent.h"
 #include "message.h"
@@ -20,30 +23,36 @@ namespace alpha {
 
 namespace protocol {
 
-typedef void (*on_notify)(std::vector<message_id>&);
-
-struct session {
-	agent a;
-};
+typedef void (*on_notify)(message_ids&);
 
 bool register_agent(agent& a);
-bool unregister_agent(session& s, agent& a);
-session login(agent& a);
-bool logout  (session& s);
-bool notify  (session& s, filter::notification& n, on_notify fn);
-bool unnotify(session& s, filter::notification& n);
-bool ignore  (session& s, filter::ignoration& i);
-bool unignore(session& s, filter::ignoration& i);
-bool send    (session& s, message& m);
-bool unsend  (session& s, message& m);
-bool update  (session& s, message& m);
+//bool unregister_agent(const session_id& sid, agent& a); // TODO
+session_id login(agent_id aid, std::string password);
+bool logout  (const session_id& sid);
+//bool notify  (const session_id& sid, filter::notification& n, on_notify fn);
+//bool unnotify(const session_id& sid, filter::notification& n); // TODO
+//bool ignore  (const session_id& sid, filter::ignoration& i);   // TODO
+//bool unignore(const session_id& sid, filter::ignoration& i);   // TODO
+bool send    (const session_id& sid, message& m);
+//bool unsend  (const session_id& sid, message& m);              // TODO
+//bool update  (const session_id& sid, message& m);              // TODO
+bool create_channel(const session_id& sid, channel& ch);
 
-bool query_channels(session& s, filter::channel& f, std::vector<channel>& r);
-bool query_messages(session& s, filter::message& f, std::vector<message>& r);
-bool query_agents  (session& s, filter::agent&   f, std::vector<agent>&   r);
-bool list_notifications(session& s, std::vector<filter::notification>& r);
-bool list_ignorations  (session& s, std::vector<filter::ignoration>&   r);
+channel_ids query_channels(const session_id& sid, const filter::channel& f);
+message_ids query_messages(const session_id& sid, const filter::message& f);
+agent_ids query_agents  (const session_id& sid, const filter::agent& f);
+//bool list_notifications(const session_id& sid, std::vector<filter::notification>& r);
+//bool list_ignorations  (const session_id& sid, std::vector<filter::ignoration>&   r);
+
+template <typename T, typename ID>
+std::vector<T> fetch(std::vector<ID> ids, std::vector<T> vec);
+
+std::vector<message> fetch_messages(const session_id& sid, const message_ids ids);
+std::vector<agent> fetch_agents(const session_id& sid, const agent_ids ids);
+std::vector<channel> fetch_channels(const session_id& sid, const channel_ids ids);
 
 }
 
 }
+
+#endif

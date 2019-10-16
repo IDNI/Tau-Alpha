@@ -10,23 +10,9 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __ALPHA_CHANNEL_H__
-#define __ALPHA_CHANNEL_H__
+#include "repl.h"
 
-#include "defs.h"
-#include "message.h"
-
-namespace alpha {
-
-struct channel {
-	channel_id id;
-	agent_id op;
-	std::string name;
-	//timestamp created;
-};
-
-std::ostream& operator<<(std::ostream& os, const channel& ch);
-
+int main (int argc, char** argv) {
+	alpha::repl r(argc, argv);
+	return r.run();
 }
-
-#endif

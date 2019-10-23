@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
-	<message id="agent">
-		<h2 class="agent-name">#${id} ${name} (${other_name})</h2>
+	<message id="short_tpl">
+		<div class="agent-short">${name} (${other_name})</div>
+	</message>
+	<message id="detail_tpl">
+		<h2 class="agent-header">${name} (${other_name})</h2>
+		<h3 class="agent-id">${id}</h3>
+	</message>
+	<message id="edit_tpl">
+		<div class="row">
+			<label for="name">Name:</label>
+        		<input type="text" name="name" id="name" autofocus="true" required="true" />
+		</div>
+		<div class="row">
+			<label for="password">Password:</label>
+        		<input type="password" name="password" id="password" required="true" />
+		</div>
+		<div class="row">
+			<label for="other_name">Other name (real, given...):</label>
+        		<input type="text" name="other_name" id="other_name" />
+		</div>
+		<div class="row">
+			<label for="email">Email:</label>
+        		<input type="email" name="email" id="email" />
+		</div>
 	</message>
 </messages>

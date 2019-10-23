@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
-	<message id="message">
-		<h3 class="message-title">${title}</h3>
+	<message id="message_template">
+		<h3 class="message-subject">${subject}</h3>
 		<div class="message-author">${author}</div>
 		<div class="message-content">${content}</div>
 	</message>

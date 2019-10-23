@@ -10,14 +10,30 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#include <locale.h>
-//#include <Wt/WText.h>
-#include <TML.h>
-#include "alpha/wt/app.h"
+#ifndef __ALPHA_WT_FILE_ITEM_H__
+#define __ALPHA_WT_FILE_ITEM_H__
 
-int main(int argc, char **argv) {
-	setlocale(LC_ALL, "");
-	bdd::init();
-	driver::init();
-	return alpha::wt::app::start(argc, argv);
+#include <string.h>
+
+#include <Wt/WStandardItem.h>
+#include <Wt/WString.h>
+
+#include <boost/filesystem.hpp>
+
+namespace alpha::wt {
+
+class file_item : public Wt::WStandardItem {
+public:
+	static const Wt::ItemDataRole FileNameRole;
+	static const Wt::ItemDataRole FilePathRole;
+
+	file_item(const std::string& iconUri, const Wt::WString& text,
+		const std::string& fileName) : Wt::WStandardItem(iconUri, text)
+	{
+		setData(text, FileNameRole);
+		setData(fileName, FilePathRole);
+	}
+};
+
 }
+#endif

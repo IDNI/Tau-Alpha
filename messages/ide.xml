@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
+
+<message id="ide_template">
+	<div style="height: 80%">
+		${menu}
+		${toolbar}
+		${ui}
+		${statusbar}
+	</div>
+</message>
+
+<message id="statusbar_template">
+	<div class="statusbar"><div class="statusbar-in">
+		<!-- <strong>step:</strong>&nbsp;${step}
+		&nbsp;&nbsp; -->
+		<strong>status:</strong>&nbsp;<span class="${status}"
+			>${status}</span>${changed}
+		<!-- &nbsp;&nbsp;
+		<strong>nodes:</strong>&nbsp;${nodes} -->
+		&nbsp;&nbsp;
+		<strong>elapsed:</strong>&nbsp;${elapsed}
+	</div></div>
+</message>
+
 <message id="TML IDE">TML IDE</message>
 
 <message id="settings">settings</message>
@@ -39,16 +62,4 @@
 <message id="unsat">unsat</message>
 <message id="contradiction">contradiction</message>
 
-<message id="statusbar">
-	<div class="statusbar"><div class="statusbar-in">
-		<!-- <strong>step:</strong>&nbsp;${step}
-		&nbsp;&nbsp; -->
-		<strong>status:</strong>&nbsp;<span class="${status}"
-			>${status}</span>${changed}
-		<!-- &nbsp;&nbsp;
-		<strong>nodes:</strong>&nbsp;${nodes} -->
-		&nbsp;&nbsp;
-		<strong>elapsed:</strong>&nbsp;${elapsed}
-	</div></div>
-</message>
 </messages>

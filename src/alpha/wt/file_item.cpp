@@ -10,14 +10,11 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#include <locale.h>
-//#include <Wt/WText.h>
-#include <TML.h>
-#include "alpha/wt/app.h"
+#include "file_item.h"
 
-int main(int argc, char **argv) {
-	setlocale(LC_ALL, "");
-	bdd::init();
-	driver::init();
-	return alpha::wt::app::start(argc, argv);
+namespace alpha::wt {
+
+const Wt::ItemDataRole file_item::FileNameRole = Wt::ItemDataRole::User;
+const Wt::ItemDataRole file_item::FilePathRole = Wt::ItemDataRole::User + 1;
+
 }

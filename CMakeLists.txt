@@ -24,29 +24,35 @@ include(install_and_activate_emsdk)
 install_and_activate_emsdk(${EMSDK_DIR})
 
 set(ALPHA_HEADERS
-	src/alpha/alpha.h
-	src/alpha/message.h
-	src/alpha/channel.h
 	src/alpha/agent.h
+	src/alpha/channel.h
+	src/alpha/defs.h
+	src/alpha/filter.h
+	src/alpha/message.h
 	src/alpha/protocol.h
-	src/alpha/widget/codemirror.h
-	src/alpha/widget/TML_editor.h
-	src/alpha/widget/splitjs.h
-	src/alpha/widget/workspace.h
-	src/alpha/widget/file_item.h
-	src/alpha/widget/ide.h
-	src/alpha/widget/message_view.h
-	src/alpha/widget/channel_view.h
-	src/alpha/widget/agent_view.h
+	src/alpha/wt/app.h
+	src/alpha/wt/codemirror.h
+	src/alpha/wt/file_item.h
+	src/alpha/wt/splitjs.h
+	src/alpha/wt/TML_editor.h
+	src/alpha/wt/workspace.h
+	src/alpha/wt/ide/ide.h
+	src/alpha/wt/ide/menu.h
+	src/alpha/wt/ide/toolbar.h
+	src/alpha/wt/view/agent.h
+	src/alpha/wt/view/channel.h
+	src/alpha/wt/view/message.h
 )
 set(ALPHA_SOURCES
 	src/main.cpp
-	src/alpha/alpha.cpp
-	src/alpha/runtime_backend.cpp
-	src/alpha/runtime_frontend.cpp
-	src/alpha/widget/ide.cpp
-	src/alpha/widget/workspace.cpp
-	src/alpha/widget/file_item.cpp
+	src/alpha/output.cpp
+	src/alpha/wt/app.cpp
+	src/alpha/wt/file_item.cpp
+	src/alpha/wt/workspace.cpp
+	src/alpha/wt/ide/ide.cpp
+	src/alpha/wt/ide/runtime_backend.cpp
+	src/alpha/wt/ide/runtime_frontend.cpp
+	src/alpha/protocol_nonet.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"
@@ -82,7 +88,7 @@ set_target_properties(tml TMLso PROPERTIES
 add_executable(alpha)
 
 # add tml.js if emscripten available
-set(EMSCRIPTEN_DIR "${EMSDK_DIR}/fastcomp/emscripten" CACHE STRING "")
+set(EMSCRIPTEN_DIR "${EMSDK_DIR}/upstream/emscripten" CACHE STRING "")
 list(APPEND CMAKE_MODULE_PATH ${TML_DIR}/cmake)
 include(emscripten_toolchain)
 emscripten_toolchain_available(EMSCRIPTEN_TOOLCHAIN_AVAILABLE)

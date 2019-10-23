@@ -19,7 +19,7 @@ namespace alpha {
 using std::endl;
 
 int repl::run() {
-	bool r;
+	bool r{true};
 	while (std::cin && loop) r = eval(parse(read()));
 	return !r;
 }

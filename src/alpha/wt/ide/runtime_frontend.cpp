@@ -24,10 +24,11 @@ void ide::runtime_frontend_load() {
 	WApplication* app = WApplication::instance();
 	app->require(app->resolveRelativeUrl("tml.js"));
 	stringstream js;
-	js
-	<< "const { bdd, driver } = tml;\n"
-	<< "bdd.init();\n"
-	<< "driver.init();\n";
+	js << R"(
+const { bdd, driver } = tml;
+bdd.init();
+driver.init();
+)";
 	Wt::log("info") << js.str();
 	doJavaScript(js.str());
 	Wt::log("info") << "loaded";
@@ -68,9 +69,12 @@ void ide::runtime_frontend() {
 			<< "var { output } = tml;\n"
 			<< output_->jsValue() << " = output.read('output')"
 			<< ".replace(/^\\n*/,'');\n" // ltrim new lines
-			<< set_tab_text_.createCall({"'info'", "output.read('info')"}) << "\n"
-			<< set_tab_text_.createCall({"'error'", "output.read('error')"}) << "\n";
-			DBG(js<<set_tab_text_.createCall({"'debug'", "output.read('debug')"}) << "\n";)
+			<< set_tab_text_.createCall({"'info'",
+						"output.read('info')"})<<"\n"
+			<< set_tab_text_.createCall({"'error'",
+						"output.read('error')"})<<"\n";
+			DBG(js<<set_tab_text_.createCall({"'debug'",
+						"output.read('debug')"})<<"\n";)
 			DBG(js<<"console.log('debug', output.read('debug'));";)
 			js
 			<< "console.log('info', output.read('info'));"
@@ -91,72 +95,71 @@ void ide::runtime_frontend() {
 			if (l_r != r) l_r = r, l_row = y = x = 0;
 			else if (l_row != row) l_row = row, ++y, x = 0;
 			WTable *table = get_table(s2ws(r));
-			Wt::log("info")
-			<< "r: `" << r
-			<< "` row: `" << row << "` val: `" << val << "`"
-			<< "` y: `" << y << "` x: `" << x;
+			// Wt::log("info") << "r: `" << r
+			// << "` row: `" << row << "` val: `" << val << "`"
+			// << "` y: `" << y << "` x: `" << x;
 			table->elementAt(y, x++)->addNew<WText>(val);
 		});
 	if (!output_finished_.isConnected()) output_finished_.connect([this]() {
 		runtime_after();
 	});
 	stringstream js;
-	js
-	<< "const { bdd, driver, options, output, strings } = tml;\n"
-	<< "const as = new strings();\n" // arguments
-	<< "as.push_back('--output');\n"
-	<< "as.push_back('@buffer');\n"
-	<< "as.push_back('--error');\n"
-	<< "as.push_back('@buffer');\n"
-	<< "as.push_back('--info');\n"
-	<< "as.push_back('@buffer');\n"
-	<< "as.push_back('--debug');\n"
-	<< "as.push_back('@buffer');\n"
-	<< "const o = new options();\n"
-	<< "o.parse(as, false);\n"
-	<< "const start = performance.now();\n"
-	<< "const d = driver.create(" << editor_->jsValue() << ", o);\n"
-	<< "const e = performance.now() - start;\n"
-	<< "const uint8array = d.to_bin();\n"
-	<< "let n = 1;\n"
-	<< "const bin2hex = buffer => {\n"
-	<< "	const byteArray = new Uint8Array(buffer);\n"
-	<< "	return Array.from(byteArray, function(byte) {\n"
-	<< "		var hex = Number(byte).toString(16);\n"
-	<< "		if (hex.length < 2) hex = '0' + hex;\n"
-	<< "		hex += ' ';\n"
-	<< "		if (!(n % 4) && n % 32) hex += ' ';\n"
-	<< "		if (!(n % 32)) hex += \"\\n\";\n"
-	<< "		++n;\n"
-	<< "		return hex;\n"
-	<< "	}).join('');\n"
-	<< "};\n"
-	<< "const bin = bin2hex(uint8array);\n"
-	<< "class tabular_collector_" << id << " {\n"
-	<< "	constructor() { \n"
-	// << "		console.log('tabular_collector_"<<id<<" created');\n"
-	<< "		this.rels = {};\n"
-	<< "	}\n"
-	<< "	length(r) {\n"
-	// << "		console.log('length(', r, ')');\n"
-	<< "		" << relation_ensure_.createCall({"r"}) << "\n"
-	<< "		this.rels[r] = this.rels[r] || 0;\n"
-	<< "		return this.rels[r];\n"
-	<< "	}\n"
-	<< "	set(r, row, col, val) {\n"
-	<< "		//console.log('set('+r+', '+row+', '+col+', '+val+')');\n"
-	<< "		" << relation_set_
-				.createCall({"r", "row", "val"}) << "\n"
-	<< "		this.rels[r]++;\n"
-	<< "	}\n"
-	<< "}\n"
-	<< "if (d.result) "<<result_.createCall({"d.result", "e", "bin"})<<";\n"
-	<< "setTimeout(function () {\n"
-	<< "	if (d.result) d.out(new tabular_collector_" << id << "());\n"
-	<< "	d.delete(); o.delete(); as.delete();\n"
-	<< "	bdd.gc();\n"
-	<< "	" << output_finished_.createCall({}) << "\n"
-	<< "}, 0);\n";
+	js << R"(
+const { bdd, driver, options, output, strings } = tml;
+const as = new strings(); // arguments
+as.push_back('--output');
+as.push_back('@buffer');
+as.push_back('--error');
+as.push_back('@buffer');
+as.push_back('--info');
+as.push_back('@buffer');
+as.push_back('--debug');
+as.push_back('@buffer');
+const o = new options();
+o.parse(as, false);
+const start = performance.now();
+const d = driver.create()"<<editor_->jsValue()<<R"(, o);
+const e = performance.now() - start;
+const uint8array = d.to_bin();
+let n = 1;
+const bin2hex = buffer => {
+	const byteArray = new Uint8Array(buffer);
+	return Array.from(byteArray, function(byte) {
+		var hex = Number(byte).toString(16);
+		if (hex.length < 2) hex = '0' + hex;
+		hex += ' ';
+		if (!(n % 4) && n % 32) hex += ' ';
+		if (!(n % 32)) hex += '\n';
+		++n;
+		return hex;
+	}).join('');
+};
+const bin = bin2hex(uint8array);
+class tabular_collector_)"<<id<<R"( {
+	constructor() {
+	//console.log('tabular_collector_)"<<id<<R"( created');
+		this.rels = {};
+	}
+	length(r) {
+//		console.log('length(', r, ')');
+		)"<<relation_ensure_.createCall({"r"})<<R"(
+		this.rels[r] = this.rels[r] || 0;
+		return this.rels[r];
+	}
+	set(r, row, col, val) {
+		//console.log('set('+r+', '+row+', '+col+', '+val+')');
+		)"<<relation_set_.createCall({"r", "row", "val"})<<R"(
+		this.rels[r]++;
+	}
+}
+if (d.result) )"<<result_.createCall({"d.result", "e", "bin"})<<R"(;
+setTimeout(function () {
+	if (d.result) d.out(new tabular_collector_)"<<id<<R"(());
+	d.delete(); o.delete(); as.delete();
+	bdd.gc();
+	)"<<output_finished_.createCall({})<<R"(
+}, 0);
+)";
 	Wt::log("info") << js.str();
 	doJavaScript(js.str());
 }

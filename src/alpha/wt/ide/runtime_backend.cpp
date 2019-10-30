@@ -14,15 +14,16 @@
 
 namespace alpha::wt::ide {
 
-using namespace std;
 using namespace Wt;
+using std::string;
+using std::wstring;
 
 void ide::runtime_backend(string prog) {
 #ifdef DISABLE_BACKEND_EXECUTION
 	return;
 #endif
 	static unsigned long id{0};
-	Wt::log("info")<<"TML(" << ++id << ") backend run";
+	log("TML(") << ++id << ") backend run";
 	toolbar_->run_backend_btn_->disable();
 	std::vector<string> args = {
 		"--output",      "@buffer",
@@ -41,7 +42,7 @@ void ide::runtime_backend(string prog) {
 		int row = table->rowCount();
 		int col = 0;
 		for (size_t ar = 0, n = 1; ar != t.arity.size();) {
-			wstringstream es;
+			std::wstringstream es;
 			while (t.arity[ar] == -1) ++ar, es << L'(';
 			if (n >= t.e.size()) break;
 			while (t.e[n].type == elem::OPENP) ++n;
@@ -64,7 +65,7 @@ void ide::runtime_backend(string prog) {
 	});
 	else update_status(UNSAT);
 
-	std::string bin = serialize_result(d);
+	string bin = serialize_result(d);
 
 	bdd::gc();
 
@@ -88,7 +89,7 @@ void ide::runtime_backend(string prog) {
 	add_text(errors_, ::output::read(L"error"));
 
 	double e = 1000 * double(end - start) / CLOCKS_PER_SEC;
-	Wt::log("info")<<"TML(" << id << ") " << ide::status_name[status_]
+	log("TML(") << id << ") " << ide::status_name[status_]
 	<< " - elapsed: " << e << " ms";
 	elapsed(e);
 

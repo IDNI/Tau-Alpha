@@ -45,6 +45,8 @@ template<typename T>
 unique_ids query(const session_id& sid, const filter& f);
 template <typename T>
 std::vector<T> fetch(const session_id &sid, std::vector<unique_id> ids);
+template <typename T>
+std::vector<T> query_fetch(const session_id& sid, const filter& f);
 
 }
 

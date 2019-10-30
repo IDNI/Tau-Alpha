@@ -14,10 +14,13 @@
 
 namespace alpha {
 
+using std::regex_match;
+using std::regex;
+
 bool message_f::match(const message& m) const {
 	if (id != "" && id != m.id) return false;
 	if (author != "" && author != m.author) return false;
-	if (subject != "" && std::regex_match(m.subject, std::regex(subject)))
+	if (subject != "" && regex_match(m.subject, regex(subject)))
 		return false;
 	if (targets.size()) {
 		for (auto chid : m.targets)
@@ -25,7 +28,7 @@ bool message_f::match(const message& m) const {
 				if (chid == t) return true;
 		return false;
 	}
-	if (content != "" && std::regex_match(m.content, std::regex(content)))
+	if (content != "" && regex_match(m.content, regex(content)))
 		return false;
 	return true;
 }
@@ -33,17 +36,17 @@ bool message_f::match(const message& m) const {
 bool channel_f::match(const channel& ch) const {
 	if (id != "" && id != ch.id) return false;
 	if (op != "" && op != ch.op) return false;
-	if (name != "" && !std::regex_match(ch.name,std::regex(name)))
+	if (name != "" && !regex_match(ch.name,regex(name)))
 		return false;
 	return true;
 }
 
 bool agent_f::match(const agent& a) const {
 	if (id != "" && id != a.id) return false;
-	if (name != "" && !std::regex_match(a.name, std::regex(name)))
+	if (name != "" && !regex_match(a.name, regex(name)))
 		return false;
-	if (other_name != "" && !std::regex_match(a.other_name,
-							std::regex(other_name)))
+	if (other_name != "" && !regex_match(a.other_name,
+							regex(other_name)))
 		return false;
 	return true;
 }

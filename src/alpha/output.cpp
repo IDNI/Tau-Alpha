@@ -16,7 +16,9 @@
 
 namespace alpha {
 
-std::ostream& operator<<(std::ostream& os, const message& m) {
+using std::ostream;
+
+ostream& operator<<(ostream& os, const message& m) {
 	os
 		<< "message("<<m.id<<")"
 		<< " [ author: `"<<m.author
@@ -33,7 +35,7 @@ std::ostream& operator<<(std::ostream& os, const message& m) {
 		<< "` ]";
 }
 
-std::ostream& operator<<(std::ostream& os, const agent& a) {
+ostream& operator<<(ostream& os, const agent& a) {
 	return os
 		<< "agent("<<a.id<<")"
 		<< " [ name: `"<<a.name
@@ -41,7 +43,7 @@ std::ostream& operator<<(std::ostream& os, const agent& a) {
 		<< "`, password: ******************** ]";
 }
 
-std::ostream& operator<<(std::ostream& os, const channel& ch) {
+ostream& operator<<(ostream& os, const channel& ch) {
 	return os
 		<< "channel("<<ch.id<<")"
 		<< " [ name: `"<<ch.name
@@ -49,10 +51,10 @@ std::ostream& operator<<(std::ostream& os, const channel& ch) {
 		<< "` ]";
 }
 
-std::ostream& operator<<(std::ostream& os, const strings& strs) {
+ostream& operator<<(ostream& os, const strings& strs) {
 	bool first{true};
 	os << "[ ";
-	for (std::string s : strs) {
+	for (auto &s : strs) {
 		if (!first) os << ", ";
 		else first = false;
 		os << '"' << s << '"';

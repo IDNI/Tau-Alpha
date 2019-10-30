@@ -14,6 +14,7 @@
 
 namespace alpha {
 
+using std::make_shared;
 using std::vector;
 template<typename T>
 using sp = std::shared_ptr<T>;
@@ -29,7 +30,7 @@ sp<T> storage<T>::get(const unique_id& id) {
 	if (it == data.end()) {
 		auto ids = protocol::fetch<T>(sid, { id });
 		if (!ids.size()) return 0;
-		data[id] = std::make_shared<T>(ids[0]);
+		data[id] = make_shared<T>(ids[0]);
 		//console_log("fetching new"); //, data[id].get());
 		return data[id];
 	}
@@ -64,7 +65,7 @@ vector<sp<T>> storage<T>::get_list(const unique_ids &ids) {
 	for (auto rit = r.begin(); rit != r.end(); rit++) {
 		auto &v = *rit;
 		if (it != got.end() && !v.get())
-			v = std::make_shared<T>(*it++);
+			v = make_shared<T>(*it++);
 	}
 	return r;
 }

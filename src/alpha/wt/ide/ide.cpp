@@ -32,7 +32,7 @@ ide::ide() :
 	output_finished_(this, "output_finished"),
 	set_tab_text_(this, "set_tab_text")
 {
-	app *a = (app *) Wt::WApplication::instance();
+	app *a = (app *) WApplication::instance();
 	a->messageResourceBundle().use("messages/ide", false);
 	//a->set_title(tr("Tau Alpha")+" - "+tr("TML IDE"));
 	addStyleClass("ide");
@@ -44,7 +44,7 @@ ide::ide() :
 #endif
 
 	editor_->setOption("lineNumbers", "'true'");
-	editor_->onUpdate().connect([this](std::string){
+	editor_->onUpdate().connect([this](string){
 		if (o.autorun) {
 #ifndef DISABLE_FRONTEND_EXECUTION
 			runtime_frontend();
@@ -67,25 +67,25 @@ ide::ide() :
 void ide::render() {
 	setTemplateText(tr("ide_template"));
 
-	menu_ = bindWidget("menu", std::make_unique<menu>(
+	menu_ = bindWidget("menu", make_unique<menu>(
 		o.linenumbers,
-		[this](Wt::WMenuItem *mi) -> void {
+		[this](WMenuItem *mi) -> void {
 			o.linenumbers = mi->isChecked();
 			editor_->setOption("lineNumbers", o.linenumbers
 				? "true" : "false");
 		},
 		o.autorun,
-		[this](Wt::WMenuItem *mi) -> void {
+		[this](WMenuItem *mi) -> void {
 			o.autorun = mi->isChecked();
 		}
 	));
 
-	toolbar_ = bindWidget("toolbar", std::make_unique<toolbar>(
+	toolbar_ = bindWidget("toolbar", make_unique<toolbar>(
 		[this](){ runtime_backend(); },
 		[this](){ runtime_frontend(); }
 	));
 
-	ui_ = bindWidget("ui", std::make_unique<splitjs>(
+	ui_ = bindWidget("ui", make_unique<splitjs>(
 				splitjs::direction::HORIZONTAL, "20,80"));
 	ui_->addStyleClass("splitter_workspace");
 
@@ -147,7 +147,7 @@ void ide::render() {
  	tabs_->addTab(move(debug), "debug");
  #endif
 
-	statusbar_ = bindWidget("statusbar", std::make_unique<WTemplate>(
+	statusbar_ = bindWidget("statusbar", make_unique<WTemplate>(
 						tr("statusbar_template")));
 	update_status(status_);
 	not_changed();
@@ -160,7 +160,7 @@ void ide::refresh_tabs() {
 }
 
 void ide::add_text(WContainerWidget* w, const std::string& text) {
-	w->addWidget(std::make_unique<WText>(WString(text)));
+	w->addWidget(make_unique<WText>(WString(text)));
 }
 
 void ide::add_text(WContainerWidget* w, const std::wstring& text) {
@@ -199,7 +199,7 @@ void ide::runtime_clear() {
 	tables_.clear();
 }
 
-std::string bin2hex(const std::string& bin) {
+string bin2hex(const string& bin) {
 	char h[100];
 	std::stringstream bs;
 	long n = 1;

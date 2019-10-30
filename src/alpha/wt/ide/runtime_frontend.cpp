@@ -14,8 +14,9 @@
 
 namespace alpha::wt::ide {
 
-using namespace std;
 using namespace Wt;
+using std::string;
+using std::stringstream;
 
 void ide::runtime_frontend_load() {
 #ifdef DISABLE_FRONTEND_EXECUTION
@@ -29,9 +30,9 @@ const { bdd, driver } = tml;
 bdd.init();
 driver.init();
 )";
-	Wt::log("info") << js.str();
+	log(js.str());
 	doJavaScript(js.str());
-	Wt::log("info") << "loaded";
+	log("loaded");
 }
 
 void ide::runtime_frontend() {
@@ -39,11 +40,11 @@ void ide::runtime_frontend() {
 	return;
 #endif
 	static unsigned long stid{0}; unsigned long id = ++stid;
-	Wt::log("info")<<"TML.js(" << id << ") frontend run";
+	log("TML.js(") << id << ") frontend run";
 	toolbar_->run_frontend_btn_->disable();
 	runtime_before();
 	if (!set_tab_text_.isConnected()) set_tab_text_.connect(
-		[this](std::string tab, std::string text) {
+		[this](string tab, string text) {
 			WContainerWidget *t = 0;
 			if (tab == "debug") t = debug_;
 			else if (tab == "info") t = info_;
@@ -52,16 +53,16 @@ void ide::runtime_frontend() {
 			add_text(t, text);
 		});
 	if (!result_.isConnected())
-		result_.connect([this, &id](bool r, double e, std::string bin) {
+		result_.connect([this, &id](bool r, double e, string bin) {
 			toolbar_->run_frontend_btn_->enable();
 
 			update_status(r ? FINISHED : UNSAT);
-			Wt::log("info")<<"TML.js(" << id << ") "
+			log("TML.js(") << id << ") "
 			<< status_name[status_]
 			<< " - elapsed: " << e << " ms";
 			elapsed(e);
 
-			DBG(Wt::log("binary") << bin);
+			DBG(log("binary") << bin);
 			add_text(binary_, bin);
 
 			stringstream js;
@@ -80,7 +81,7 @@ void ide::runtime_frontend() {
 			<< "console.log('info', output.read('info'));"
 			<< "console.log('error', output.read('error'));";
 
-			Wt::log("info") << js.str();
+			log(js.str());
 			this->doJavaScript(js.str());
 			output_->sync();
 		});
@@ -160,7 +161,7 @@ setTimeout(function () {
 	)"<<output_finished_.createCall({})<<R"(
 }, 0);
 )";
-	Wt::log("info") << js.str();
+	log(js.str());
 	doJavaScript(js.str());
 }
 

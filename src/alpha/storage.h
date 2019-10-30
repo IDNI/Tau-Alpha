@@ -25,9 +25,9 @@ class storage {
 	std::map<unique_id, item> data{};
 public:
 	storage(const session_id& sid) : sid(sid) {}
-	std::vector<item> get(const unique_ids &ids);
 	item get(const unique_id& id);
 	item get(const filter &f);
+	std::vector<item> get_list(const unique_ids &ids);
 	std::vector<item> get_list(const filter &f); //size_t /*limit = 0*/);
 };
 

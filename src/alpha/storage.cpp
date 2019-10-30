@@ -23,30 +23,6 @@ template class storage<channel>;
 template class storage<message>;
 
 template<typename T>
-vector<sp<T>> storage<T>::get(const unique_ids &ids) {
-	if (!ids.size()) return {};
-	//console_log("get "+id); //, data[id].get());
-	unique_ids to_fetch{};
-	vector<sp<T>> r(ids.size());
-	size_t i = 0;
-	for (auto &id : ids) {
-		auto it = data.find(id);
-		if (it == data.end()) r[i] = 0, to_fetch.push_back(id);
-		else r[i] = it->second;
-		++i;
-	}
-	if (!to_fetch.size()) return r;
-	auto got = protocol::fetch<T>(sid, to_fetch);
-	auto it = got.begin();
-	for (auto rit = r.begin(); rit != r.end(); rit++) {
-		auto &v = *rit;
-		if (it != got.end() && !v.get())
-			v = std::make_shared<T>(*it++);
-	}
-	return r;
-}
-
-template<typename T>
 sp<T> storage<T>::get(const unique_id& id) {
 	//console_log("get "+id); //, data[id].get());
 	auto it = data.find(id);
@@ -70,11 +46,35 @@ sp<T> storage<T>::get(const filter &f) {
 }
 
 template<typename T>
+vector<sp<T>> storage<T>::get_list(const unique_ids &ids) {
+	if (!ids.size()) return {};
+	//console_log("get "+id); //, data[id].get());
+	unique_ids to_fetch{};
+	vector<sp<T>> r(ids.size());
+	size_t i = 0;
+	for (auto &id : ids) {
+		auto it = data.find(id);
+		if (it == data.end()) r[i] = 0, to_fetch.push_back(id);
+		else r[i] = it->second;
+		++i;
+	}
+	if (!to_fetch.size()) return r;
+	auto got = protocol::fetch<T>(sid, to_fetch);
+	auto it = got.begin();
+	for (auto rit = r.begin(); rit != r.end(); rit++) {
+		auto &v = *rit;
+		if (it != got.end() && !v.get())
+			v = std::make_shared<T>(*it++);
+	}
+	return r;
+}
+
+template<typename T>
 vector<sp<T>> storage<T>::get_list(const filter &f) {
 	unique_ids ids = protocol::query<T>(sid, f);
 	//log("ids.size() ") << ids.size();
 	if (!ids.size()) return {};
-	return get(ids);
+	return get_list(ids);
 }
 
 }

@@ -17,7 +17,7 @@
 
 namespace alpha {
 
-struct agent {
+struct agent : public object {
 	agent_id         id{0};
 //	cryptographic_id identity;
 //	picture          picture;
@@ -27,12 +27,14 @@ struct agent {
 //	std::string      email;
 //	std::string      about;
 //	custom_ids       custom_ids;
-	agent() {};
+	agent() = default;
 	agent(std::string name, std::string password, std::string other_name="")
 		: name(name), password(password), other_name(other_name) {};
 };
 
 std::ostream& operator<<(std::ostream& os, const agent& a);
+
+typedef std::shared_ptr<agent> sp_agent;
 
 }
 

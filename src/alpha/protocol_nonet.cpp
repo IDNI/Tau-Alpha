@@ -24,6 +24,8 @@
 
 namespace alpha {
 
+using std::is_same;
+
 struct session {
 	session_id id;
 	agent a;
@@ -43,6 +45,32 @@ std::map<message_id, message*> messages_map{};
 std::map<channel_id, std::vector<message_id>> channel_messages_map{};
 
 namespace protocol {
+
+enum object_types { AGENT, CHANNEL, MESSAGE };
+
+template <typename T>
+constexpr int object_type(){
+	if constexpr(is_same<T,agent>::value)   return AGENT;
+	if constexpr(is_same<T,channel>::value) return CHANNEL;
+	if constexpr(is_same<T,message>::value) return MESSAGE;
+	return -1;
+}
+
+template <typename T>
+constexpr std::vector<T>& objects() {
+	if constexpr(is_same<T,agent>::value)   return agents;
+	if constexpr(is_same<T,channel>::value) return channels;
+	if constexpr(is_same<T,message>::value) return messages;
+	throw 0;
+}
+
+template<typename T>
+bool match_filter(const filter& f, const T& o) {
+	if constexpr(is_same<T,agent>::value)	return ((agent_f&)f).match(o);
+	if constexpr(is_same<T,channel>::value) return ((channel_f&)f).match(o);
+	if constexpr(is_same<T,message>::value) return ((message_f&)f).match(o);
+	throw 0;
+}
 
 template <typename T>
 std::ostream& info(T v) { return std::cout << "nonet/" << v << ": "; }
@@ -73,8 +101,9 @@ session_id login(agent_id aid, std::string password) {
 	agent* a = it->second;
 
 	for (auto& s : sessions) if (s.a.id == aid) {
-		info("login")<<"agent already logged in "<<aid<<std::endl;
-		return {};
+		info("login")<<"agent "<<aid
+		<<" already logged in with session_id: "<<s.id<<std::endl;
+		return s.id;
 	}
 
 	if (password != a->password) {
@@ -111,6 +140,8 @@ bool logout(const session_id &sid) {
 }
 
 bool loggedin(const session_id &sid) {
+	info("loggedin") << "sid: " << sid << " t/f:"
+	<< (sessions_map.find(sid) != sessions_map.end()) << std::endl;
 	return sessions_map.find(sid) != sessions_map.end();
 }
 
@@ -141,8 +172,6 @@ bool create_channel(const session_id& sid, channel& ch) {
 	return true;
 }
 
-//bool query_channels(const session_id& sid, )
-
 bool send(const session_id &sid, message& m) {
 	agent a;
 	if (!logged_agent(sid, a)) {
@@ -159,56 +188,31 @@ bool send(const session_id &sid, message& m) {
 	return true;
 }
 
-agent_ids query_agents(const session_id &sid, const filter::agent &f) {
+template<typename T> // query for ids
+unique_ids query(const session_id& sid, const filter& f) {
 	if (!loggedin(sid)) return {};
-	agent_ids r;
-	for (agent& a : agents)
-		if (f.match(a))
-			r.push_back(a.id);
+	unique_ids r;
+	for (T& o : objects<T>())
+		if (match_filter(f, o))	r.push_back(o.id);
 	return r;
 }
 
-channel_ids query_channels(const session_id &sid, const filter::channel &f) {
+template <typename T> // fetch object by ids
+std::vector<T> fetch(const session_id &sid, std::vector<unique_id> ids) {
 	if (!loggedin(sid)) return {};
-	channel_ids r;
-	for (channel& ch : channels)
-		if (f.match(ch))
-			r.push_back(ch.id);
-	return r;
-}
-
-message_ids query_messages(const session_id &sid, const filter::message &f) {
-	if (!loggedin(sid)) return {};
-	message_ids r;
-	for (message& m : messages)
-		if (f.match(m))
-			r.push_back(m.id);
-	return r;
-}
-
-template <typename T, typename ID>
-std::vector<T> fetch(std::vector<ID> ids, std::vector<T> vec) {
 	std::vector<T> r;
-	for (ID& id : ids)
-		for (T e : vec)
+	for (auto& id : ids)
+		for (T e : objects<T>())
 			if (e.id == id) r.push_back(e);
 	return r;
 }
 
-std::vector<agent> fetch_agents(const session_id &sid, agent_ids ids) {
-	if (!loggedin(sid)) return {};
-	return fetch(ids, agents);
-}
-
-std::vector<channel> fetch_channels(const session_id &sid, channel_ids ids) {
-	if (!loggedin(sid)) return {};
-	return fetch(ids, channels);
-}
-
-std::vector<message> fetch_messages(const session_id &sid, message_ids ids) {
-	if (!loggedin(sid)) return {};
-	return fetch(ids, messages);
-}
+template agent_ids query<agent>(const session_id&, const filter&);
+template channel_ids query<channel>(const session_id&, const filter&);
+template message_ids query<message>(const session_id&, const filter&);
+template std::vector<agent> fetch<agent>(const session_id&, agent_ids ids);
+template std::vector<channel> fetch<channel>(const session_id&, channel_ids ids);
+template std::vector<message> fetch<message>(const session_id&, message_ids ids);
 
 }
 

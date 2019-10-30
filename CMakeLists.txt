@@ -30,6 +30,7 @@ set(ALPHA_HEADERS
 	src/alpha/filter.h
 	src/alpha/message.h
 	src/alpha/protocol.h
+	src/alpha/storage.h
 	src/alpha/wt/app.h
 	src/alpha/wt/codemirror.h
 	src/alpha/wt/file_item.h
@@ -45,13 +46,18 @@ set(ALPHA_HEADERS
 )
 set(ALPHA_SOURCES
 	src/main.cpp
+	src/alpha/filter.cpp
 	src/alpha/output.cpp
+	src/alpha/storage.cpp
 	src/alpha/wt/app.cpp
 	src/alpha/wt/file_item.cpp
 	src/alpha/wt/workspace.cpp
 	src/alpha/wt/ide/ide.cpp
 	src/alpha/wt/ide/runtime_backend.cpp
 	src/alpha/wt/ide/runtime_frontend.cpp
+	src/alpha/wt/view/agent.cpp
+	src/alpha/wt/view/channel.cpp
+	src/alpha/wt/view/message.cpp
 	src/alpha/protocol_nonet.cpp
 )
 set(ALPHA_COMPILE_OPTION

@@ -10,30 +10,26 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __ALPHA_MESSAGE_H__
-#define __ALPHA_MESSAGE_H__
+#ifndef __ALPHA_STORAGE_H__
+#define __ALPHA_STORAGE_H__
 
 #include "defs.h"
+#include "protocol.h"
 
 namespace alpha {
 
-struct message : public object {
-	message_id id;
-	agent_id author;
-	channel_ids targets;
-	std::string subject;
-	file content;
-//	file formal;
-//	timestamp created;
-//	timestamp publish;
-//	timestamp valid;
-//	message_ids reacts_to;
-//	message() {};
+template<typename T>
+class storage {
+	using item = std::shared_ptr<T>;
+	session_id sid;
+	std::map<unique_id, item> data{};
+public:
+	storage(const session_id& sid) : sid(sid) {}
+	std::vector<item> get(const unique_ids &ids);
+	item get(const unique_id& id);
+	item get(const filter &f);
+	std::vector<item> get_list(const filter &f); //size_t /*limit = 0*/);
 };
-
-std::ostream& operator<<(std::ostream& os, const message& m);
-
-typedef std::shared_ptr<message> sp_message;
 
 }
 

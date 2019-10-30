@@ -18,14 +18,18 @@
 
 namespace alpha {
 
-struct channel {
+struct channel : object {
 	channel_id id;
 	agent_id op;
 	std::string name;
 	//timestamp created;
+	channel() = default;
+	channel(std::string name) : name(name) {}
 };
 
 std::ostream& operator<<(std::ostream& os, const channel& ch);
+
+typedef std::shared_ptr<channel> sp_channel;
 
 }
 

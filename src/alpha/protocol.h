@@ -38,18 +38,13 @@ bool send    (const session_id& sid, message& m);
 //bool update  (const session_id& sid, message& m);              // TODO
 bool create_channel(const session_id& sid, channel& ch);
 
-channel_ids query_channels(const session_id& sid, const filter::channel& f);
-message_ids query_messages(const session_id& sid, const filter::message& f);
-agent_ids query_agents  (const session_id& sid, const filter::agent& f);
 //bool list_notifications(const session_id& sid, std::vector<filter::notification>& r);
 //bool list_ignorations  (const session_id& sid, std::vector<filter::ignoration>&   r);
 
-template <typename T, typename ID>
-std::vector<T> fetch(std::vector<ID> ids, std::vector<T> vec);
-
-std::vector<message> fetch_messages(const session_id& sid, const message_ids ids);
-std::vector<agent> fetch_agents(const session_id& sid, const agent_ids ids);
-std::vector<channel> fetch_channels(const session_id& sid, const channel_ids ids);
+template<typename T>
+unique_ids query(const session_id& sid, const filter& f);
+template <typename T>
+std::vector<T> fetch(const session_id &sid, std::vector<unique_id> ids);
 
 }
 

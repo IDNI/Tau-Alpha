@@ -18,6 +18,7 @@
 #include <vector>
 #include <array>
 #include <iostream>
+#include <memory>
 
 namespace alpha {
 
@@ -35,6 +36,7 @@ typedef file picture;                 // or IRI? (file:///home/user/pic.jpg)
 typedef file custom_id;               // or IRI?
 typedef std::vector<custom_id> custom_ids;
 
+typedef std::vector<unique_id> unique_ids;
 typedef std::vector<channel_id> channel_ids;
 typedef std::vector<agent_id> agent_ids;
 typedef std::vector<message_id> message_ids;
@@ -42,6 +44,8 @@ typedef std::vector<message_id> message_ids;
 typedef std::vector<std::string> strings;
 
 std::ostream& operator<<(std::ostream& os, const strings& strs);
+
+struct object {};
 
 }
 

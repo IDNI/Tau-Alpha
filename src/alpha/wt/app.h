@@ -12,13 +12,14 @@
 // modified over time by the Author.
 #ifndef __ALPHA_WT_APP_H__
 #define __ALPHA_WT_APP_H__
-
 #include <string>
 
 #include <Wt/WApplication.h>
 #include <Wt/WEnvironment.h>
 #include <Wt/WString.h>
 #include <Wt/WText.h>
+
+#include "../storage.h"
 
 #include "view/agent.h"
 #include "view/channel.h"
@@ -28,33 +29,45 @@
 
 namespace alpha::wt {
 
+using up_widget = std::unique_ptr<Wt::WWidget>;
+
 Wt::WString tr(std::string s);
 
 struct app : public Wt::WApplication {
 	app(const Wt::WEnvironment& env);
 	static int start(int argc, char** argv);
+	sp_agent get_agent(const agent_id& aid);
+	//sp_channel get_channel(const channel_id& chid);
+	//sp_channel get_channel_by_name(const std::string& name);
+	session_id get_session_id() const { return sid; }
+	storage<agent>* agents() const { return agents_.get(); };
+	storage<message>* messages() const { return messages_.get(); };
+	storage<channel>* channels() const { return channels_.get(); };
+	static app* instance() {
+		return dynamic_cast<app*>(Wt::WApplication::instance());
+	};
 private:
 	session_id sid;
-	std::unique_ptr<agent> a;
-	agent* a_;
+	sp_agent user_;
+	sp_channel aggr_;
+	std::unique_ptr<storage<agent>> agents_;
+	std::unique_ptr<storage<channel>> channels_;
+	std::unique_ptr<storage<message>> messages_;
 
-	view::agent* profile_;
-	view::channel* feed_;
-	ide::ide* ide_;
-
-	void log(std::string level, std::string message) {
-		Wt::log(level) << message;
+	Wt::WLogEntry log(std::string level, std::string message) {
+		return Wt::log(level) << message;
 	}
-	void log(std::string message) { log("info", message); }
+	Wt::WLogEntry log(std::string message) { return log("info", message); }
 	void console_log(std::string level, std::string message);
 	void console_log(std::string message) { console_log("info", message); }
 
 	void create_ui();
 	Wt::WMenuItem* add_to_menu(Wt::WMenu *menu, const Wt::WString& name,
-		std::unique_ptr<Wt::WWidget> w, std::unique_ptr<Wt::WWidget> t);
-	std::unique_ptr<Wt::WWidget> profile();
-	std::unique_ptr<Wt::WWidget> feed();
-	std::unique_ptr<Wt::WWidget> ide();
+		up_widget w, up_widget t);
+	up_widget view_profile();
+	up_widget view_ide();
+	up_widget view_channel(const channel_id& chid);
+	up_widget view_channel_by_name(const std::string& n);
 };
 
 }

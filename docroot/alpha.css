@@ -299,4 +299,6 @@ button
 a { color: #909090; text-decoration: none; }
 */
 
-
+div.agent-short {
+	display: inline;
+}

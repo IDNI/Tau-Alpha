@@ -15,12 +15,15 @@
 #include <regex>
 
 #include "defs.h"
+#include "agent.h"
+#include "channel.h"
+#include "message.h"
 
 namespace alpha {
 
-namespace filter {
+// TODO match functions for GROUPS
 
-struct filter {};
+struct filter { };
 
 struct terminal : public filter { terminal() {} };
 
@@ -42,7 +45,7 @@ struct not_ : public group {
 	not_(filter f1) : group(filters{f1}) {}
 };
 
-struct message : public terminal {
+struct message_f : public terminal {
 	message_id id; // 0 = null
 	agent_id author; // 0/"" = null
 	std::string subject; // "" = null
@@ -52,60 +55,28 @@ struct message : public terminal {
 	channel_ids targets;   // {} = null
 	std::string content;   // {} = null
 	//std::vector<message_id> reacts_to; // {} = null
-	bool match(const ::alpha::message& m) const {
-		if (id != "" && id != m.id) return false;
-		if (author != "" && author != m.author) return false;
-		if (subject != "" && std::regex_match(m.subject,
-							std::regex(subject)))
-			return false;
-		if (targets.size()) {
-			for (auto chid : m.targets)
-				for (auto t : targets)
-					if (chid == t) return true;
-			return false;
-		}
-		if (content != "" && std::regex_match(m.content,
-							std::regex(content)))
-			return false;
-		return true;
-	}
+	virtual bool match(const message& m) const;
 };
 
-typedef message notification;
+typedef message_f notification;
 
-typedef message ignoration;
+typedef message_f ignoration;
 
-struct channel : public terminal {
+struct channel_f : public terminal {
 	channel_id id;
 	agent_id op;
 	std::string name;
 	//timerange created;
-	bool match(const ::alpha::channel& ch) const {
-		if (id != "" && id != ch.id) return false;
-		if (op != "" && op != ch.op) return false;
-		if (name != "" && std::regex_match(ch.name,std::regex(name)))
-			return false;
-		return true;
-	}
+	virtual bool match(const channel& ch) const;
 };
 
-struct agent : public terminal {
+struct agent_f : public terminal {
 	agent_id id;
 	std::string name;
 	std::string other_name;
 	//std::string email;
-	bool match(const ::alpha::agent& a) const {
-		if (id != "" && id != a.id) return false;
-		if (name != "" && std::regex_match(a.name, std::regex(name)))
-			return false;
-		if (other_name != "" && std::regex_match(a.other_name,
-							std::regex(other_name)))
-			return false;
-		return true;
-	}
+	virtual bool match(const agent& a) const;
 };
-
-}
 
 }
 

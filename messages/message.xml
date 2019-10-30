@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
-	<message id="message_template">
+	<message id="SEND">SEND</message>
+	<message id="short_msg_tpl">
+		<span class="message-subject">${subject}</span>
+	</message>
+	<message id="detail_msg_tpl">
 		<h3 class="message-subject">${subject}</h3>
 		<div class="message-author">${author}</div>
 		<div class="message-content">${content}</div>
 	</message>
+	<message id="form_msg_tpl">${post_form}</message>
 </messages>

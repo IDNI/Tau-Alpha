@@ -12,9 +12,7 @@
 // modified over time by the Author.
 #ifndef __ALPHA_WT_VIEW_AGENT_H__
 #define __ALPHA_WT_VIEW_AGENT_H__
-#include <Wt/WApplication.h>
 #include <Wt/WTemplate.h>
-#include <Wt/WText.h>
 
 #include "../../agent.h"
 
@@ -22,29 +20,15 @@ namespace alpha::wt::view {
 
 struct agent : public Wt::WTemplate {
 	enum render_type { SHORT, DETAIL, EDIT };
-	agent(alpha::agent *a, render_type type) : a(a), type(type) {
-		//if (!a || a->id.size() <= 1) return;
-		Wt::WApplication *app = Wt::WApplication::instance();
-		app->messageResourceBundle().use("messages/agent");
-		addStyleClass("agent");
-		render();
-	}
-	void bind_data() {
-		bindWidget("id", std::make_unique<Wt::WText>(a->id));
-		bindWidget("name", std::make_unique<Wt::WText>(a->name));
-		bindWidget("other_name",
-			std::make_unique<Wt::WText>(a->other_name));
-	}
-	void render() {
-		std::string tpl = DETAIL == type
-			? "detail" : EDIT == type
-				? "edit" : "short";
-		setTemplateText(tr(tpl+"_tpl"));
-		bind_data();
-	}
+	strings type_names = { "short", "detail", "edit" };
+	sp_agent get_agent(const agent_id& aid);
+	agent(const render_type& type, const agent_id& aid);
+	agent(const render_type& type, sp_agent sa=0);
+	void render();
+	void bind_data();
 private:
-	alpha::agent* a;
 	render_type type;
+	sp_agent sa;
 };
 
 }

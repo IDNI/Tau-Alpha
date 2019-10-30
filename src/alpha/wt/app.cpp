@@ -33,12 +33,15 @@
 using namespace Wt;
 using std::unique_ptr;
 using std::make_unique;
+using std::make_shared;
 using std::string;
+using std::cerr;
+using std::endl;
 
 namespace alpha::wt {
 
-using agent_render_type = view::agent::render_type;
-
+using agent_rt   = view::agent::render_type;
+using message_rt = view::message::render_type;
 
 WString tr(string s) { return WString::tr(s); }
 
@@ -46,78 +49,94 @@ unique_ptr<WApplication> create_app(const WEnvironment& env) {
 	return make_unique<app>(env);
 }
 
-unique_ptr<WWidget> app::profile() {
-	auto up = make_unique<view::agent>(a.get(), agent_render_type::SHORT);
-	profile_ = up.get();
-	return up;
+up_widget app::view_profile() {
+	return make_unique<view::agent>(agent_rt::SHORT, user_);
 }
 
-unique_ptr<WWidget> app::feed() {
-	auto up = make_unique<view::channel>(channel{});
-	feed_ = up.get();
-	return up;
+up_widget app::view_channel(const channel_id& chid = channel_id{}) {
+	return make_unique<view::channel>(chid == channel_id{}
+		? aggr_ // use aggregator feed if no chid
+		: channels()->get(chid));
 }
 
-unique_ptr<WWidget> app::ide() {
-	auto up = make_unique<ide::ide>();
-	ide_ = up.get();
-	return up;
+up_widget app::view_channel_by_name(const string& name = "") {
+	sp_channel& ch = aggr_;
+	if (name != "") {
+		channel_f f{}; f.name = name;
+		ch = channels()->get(f);
+	}
+	return make_unique<view::channel>(ch);
+}
+
+up_widget app::view_ide() {
+	return make_unique<ide::ide>();
 }
 
 int app::start(int argc, char** argv) {
 	try {
 		WServer server(argv[0]);
 		server.setServerConfiguration(argc, argv, WTHTTP_CONFIGURATION);
-		auto ep_app = EntryPointType::Application;
-		server.addEntryPoint(ep_app, &create_app);
-		//server.addEntryPoint(ep_app, &create_some_app, "/some_app");
+		server.addEntryPoint(EntryPointType::Application, &create_app);
 		if (server.start()) {
 			int sig = WServer::waitForShutdown();
-			std::cerr << "Shutdown (signal = " << sig << ")"
-								<< std::endl;
+			cerr << "shutdown (signal = " << sig << ")" << endl;
 			server.stop();
 		}
+		return 0;
 	} catch (WServer::Exception& e) {
-		std::cerr << e.what() << "\n";
-		return 1;
+		cerr << e.what() << endl;
 	} catch (std::exception& e) {
-		std::cerr << "exception: " << e.what() << "\n";
-		return 1;
+		cerr << "exception: " << e.what() << endl;
 	}
-	return 0;
+	return 1;
 }
 
 app::app(const WEnvironment& env) : WApplication(env) {
+	// register and login user john TODO: register form
+	user_ = make_shared<agent>("john", "secret", "John Doe");
+	auto a = user_.get();
+	bool r = protocol::register_agent(*a);       // register
+	if (!r) a->id = "1";                         // or set agents id
+	sid = protocol::login(a->id, a->password);
+	log("session id: ", sid);
 
-	// TODO register form (now just create user john)
-	a = make_unique<agent>("john", "secret", "John Doe");
-	a_ = a.get();
-	protocol::register_agent(*a_);
-	sid = protocol::login(a_->id, a_->password);
-	console_log("session id: ", sid);
+	// storages for network objects
+	agents_   = make_unique<storage<agent>>(sid);
+	channels_ = make_unique<storage<channel>>(sid);
+	messages_ = make_unique<storage<message>>(sid);
 
+	// aggregator channel
+	aggr_ = make_shared<channel>("aggr");
+
+	// create testing channels
+	channel ch1 = channel("channel1");
+	protocol::create_channel(sid, ch1);
+	channel ch2 = channel("channel2");
+	protocol::create_channel(sid, ch2);
+
+	// set boostrap theme
 	const string *themePtr = env.getParameter("theme");
 	string theme;
 	if (!themePtr) theme = "bootstrap3";
 	else theme = *themePtr;
 	if (theme == "bootstrap3") {
-		auto bootstrapTheme = std::make_shared<WBootstrapTheme>();
+		auto bootstrapTheme = make_shared<WBootstrapTheme>();
 		bootstrapTheme->setVersion(BootstrapVersion::v3);
 		bootstrapTheme->setResponsive(true);
 		setTheme(bootstrapTheme);
 		useStyleSheet(
 			"resources/themes/bootstrap/3/bootstrap-theme.min.css");
 	} else if (theme == "bootstrap2") {
-		auto bootstrapTheme = std::make_shared<WBootstrapTheme>();
+		auto bootstrapTheme = make_shared<WBootstrapTheme>();
 		bootstrapTheme->setResponsive(true);
 		setTheme(bootstrapTheme);
-	} else setTheme(std::make_shared<WCssTheme>(theme));
+	} else setTheme(make_shared<WCssTheme>(theme));
 
 	create_ui();
 }
 
 WMenuItem* app::add_to_menu(WMenu *menu, const WString& name,
-	unique_ptr<WWidget> c, unique_ptr<WWidget> t = 0)
+	up_widget c, up_widget t = 0)
 {
 	auto pane = make_unique<WContainerWidget>();
 	auto pane_ = pane.get();
@@ -152,9 +171,15 @@ void app::create_ui() {
 	auto menu = make_unique<WMenu>(contents.get());
 	//menu->setInternalPathEnabled();
 	//menu->setInternalBasePath("/");
-	add_to_menu(menu.get(), tr("PROFILE"), profile());
-	add_to_menu(menu.get(), tr("FEED"),    feed());
-	add_to_menu(menu.get(), tr("IDE"),     ide());
+	add_to_menu(menu.get(), tr("PROFILE"), view_profile());
+	// add_to_menu(menu.get(), tr("FEED"), view_channel());
+	add_to_menu(menu.get(), tr("CHANNEL")+"1",
+					view_channel_by_name("channel1"));
+	add_to_menu(menu.get(), tr("CHANNEL")+"2",
+					view_channel_by_name("channel2"));
+	// add_to_menu(menu.get(), tr("CHANNEL")+"3",
+	// 				view_channel_by_name("channel3"));
+	add_to_menu(menu.get(), tr("IDE"), view_ide());
 	//menu_->itemSelectRendered().connect(this, &Home::updateTitle);
 
 	navbar->addMenu(move(menu));

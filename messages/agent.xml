@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
-	<message id="short_tpl">
-		<div class="agent-short">${name} (${other_name})</div>
+	<message id="short_agent_tpl">
+		<span class="agent-short">${name} (${other_name})</span>
 	</message>
-	<message id="detail_tpl">
+	<message id="detail_agent_tpl">
 		<h2 class="agent-header">${name} (${other_name})</h2>
 		<h3 class="agent-id">${id}</h3>
 	</message>
-	<message id="edit_tpl">
+	<message id="edit_agent_tpl">
 		<div class="row">
 			<label for="name">Name:</label>
         		<input type="text" name="name" id="name" autofocus="true" required="true" />

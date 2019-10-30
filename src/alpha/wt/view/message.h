@@ -12,30 +12,34 @@
 // modified over time by the Author.
 #ifndef __ALPHA_WT_VIEW_MESSAGE_H__
 #define __ALPHA_WT_VIEW_MESSAGE_H__
-#include <Wt/WApplication.h>
+#include <functional>
+
+#include <Wt/WPushButton.h>
 #include <Wt/WTemplate.h>
-#include <Wt/WText.h>
+#include <Wt/WTextArea.h>
+#include <Wt/WLineEdit.h>
 
 #include "../../message.h"
 
 namespace alpha::wt::view {
 
-class message : public Wt::WTemplate {
-	alpha::message m;
-public:
-	message(alpha::message m) : m(m) {
-		Wt::WApplication *app = Wt::WApplication::instance();
-		app->messageResourceBundle().use("messages/message");
-		addStyleClass("message");
-		render();
+typedef std::function<void()> on_send_fn_t;
 
-	}
-	void render() {
-		setTemplateText(tr("message_template"));
-		bindWidget("author",  std::make_unique<Wt::WText>(m.author));
-		bindWidget("subject",   std::make_unique<Wt::WText>(m.subject));
-		bindWidget("content", std::make_unique<Wt::WText>(m.content));
-	}
+struct message : public Wt::WTemplate {
+	enum render_type { SHORT, DETAIL, FORM };
+	message(const render_type& type, sp_message sm=0, on_send_fn_t cb=0);
+	void render();
+	void render_form();
+	void bind_data();
+	void send();
+private:
+	render_type type;
+	sp_message sm;
+	on_send_fn_t cb_;
+	strings type_names = { "short", "detail", "form" };
+	Wt::WLineEdit *subject_;
+	Wt::WTextArea *content_;
+	Wt::WPushButton *send_;
 };
 
 }

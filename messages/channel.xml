@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <messages>
-	<message id="channel_template">
+	<message id="channel_tpl">
 		<h2 class="channel-name">${name}</h2>
-		<div class="channel-op">${op}</div>
+		<div class="channel-owner">owner: ${op}</div>
 		<div class="channel-messages">${messages}</div>
+		<div class="channel-post-form">${post_form}</div>
 	</message>
+	<message id="no msgs">no messages</message>
 </messages>

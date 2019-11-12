@@ -17,6 +17,7 @@
 #include <Wt/WText.h>
 
 #include "message.h"
+#include "agent.h"
 #include "../app.h"
 #include "../../protocol.h"
 
@@ -25,6 +26,7 @@ namespace alpha::wt::view {
 using namespace Wt;
 using std::make_shared;
 using std::make_unique;
+using agent_rt = agent::render_type;
 
 message::message(const render_type& type, sp_message sm, on_send_fn_t cb)
 : type(type), sm(sm), cb_(cb)
@@ -58,7 +60,7 @@ void message::render_form() {
 
 void message::bind_data() {
 	if (!sm) return;
-	bindWidget("author",  make_unique<WText>(sm->author));
+	bindWidget("author",  make_unique<agent>(agent_rt::SHORT, sm->author));
 	bindWidget("subject", make_unique<WText>(sm->subject));
 	bindWidget("content", make_unique<WText>(sm->content));
 }

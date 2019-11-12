@@ -44,6 +44,12 @@ class repl {
 	bool login(strings args);
 	bool logout();
 	bool send(strings args);
+	bool unsend(strings args);
+	bool update(strings args);
+
+	bool notify(strings args);
+	bool unnotify(strings args);
+	bool list_notifications();
 
 	bool create_channel(strings args);
 

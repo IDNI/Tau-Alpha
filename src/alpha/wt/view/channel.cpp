@@ -42,7 +42,7 @@ void channel::render() {
 
 void channel::bind_data() {
 	if (!sch) return;
-	bindWidget("op",   make_unique<view::agent>(agent_rt::SHORT, sch->op));
+	bindWidget("creator",   make_unique<agent>(agent_rt::SHORT, sch->creator));
 	bindWidget("name", make_unique<WText>(sch->name));
 	bind_messages();
 	sp_message post = make_shared<alpha::message>();

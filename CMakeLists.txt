@@ -48,6 +48,7 @@ set(ALPHA_SOURCES
 	src/main.cpp
 	src/alpha/filter.cpp
 	src/alpha/output.cpp
+	src/alpha/protocol_nonet.cpp
 	src/alpha/storage.cpp
 	src/alpha/wt/app.cpp
 	src/alpha/wt/file_item.cpp
@@ -58,7 +59,6 @@ set(ALPHA_SOURCES
 	src/alpha/wt/view/agent.cpp
 	src/alpha/wt/view/channel.cpp
 	src/alpha/wt/view/message.cpp
-	src/alpha/protocol_nonet.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"

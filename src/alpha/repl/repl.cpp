@@ -16,17 +16,31 @@
 
 namespace alpha {
 
+using std::string;
+using std::vector;
 using std::endl;
+
+string concat_rest(strings args, const size_t from) {
+	std::stringstream ss;
+	for (size_t i = from; i < args.size(); ++i) {
+		if (i != from) ss << " ";
+		ss << args[i];
+	}
+	return ss.str();
+}
 
 int repl::run() {
 	bool r{true};
-	while (std::cin && loop) r = eval(parse(read()));
+	while (std::cin && loop) {
+		r = eval(parse(read()));
+		if (r) p("") << endl;
+	}
 	return !r;
 }
 
-std::string repl::read() {
+string repl::read() {
 	std::stringstream ss;
-	std::string ln;
+	string ln;
 	p(prompt());
 	std::getline(std::cin, ln);
 	if (!std::cin) return "";
@@ -38,17 +52,18 @@ std::string repl::read() {
 	return ss.str();
 }
 
-strings repl::parse(std::string input) {
+strings repl::parse(string input) {
 	std::istringstream in(input);
-	std::string w{};
+	string w{};
 	strings r{};
 	while (in >> w) if (in) r.push_back(w);
+	if (!r.size()) p("") << endl;
 	return r;
 }
 
 bool repl::eval(strings command) {
 	if (!command.size()) return false;
-	std::string cmd{command[0]};
+	string cmd{command[0]};
 	if (cmd == "reg" || cmd == "register" || cmd == "register_agent")
 		return register_agent(command);
 	else if (cmd == "l" || cmd == "li" || cmd == "login")
@@ -65,6 +80,16 @@ bool repl::eval(strings command) {
 		return query_and_fetch_channels(command);
 	else if (cmd == "qa" || cmd == "query_agents")
 		return query_and_fetch_agents(command);
+	else if (cmd == "notify" || cmd == "trigger")
+		return notify(command);
+	else if (cmd == "unnotify" || cmd == "untrigger")
+		return unnotify(command);
+	else if (cmd == "unsend" || cmd == "delete" || cmd == "remove")
+		return unsend(command);
+	else if (cmd == "update" || cmd == "edit" || cmd == "change")
+		return update(command);
+	else if (cmd == "list_notifications" || cmd == "ln")
+		return list_notifications();
 	else if (cmd == "q" || cmd == "quit" || cmd == "x" || cmd == "exit")
 		return loop = false, true;
 	return false;
@@ -80,7 +105,7 @@ bool repl::check_args(const strings args, const size_t n_required) const {
 
 bool repl::register_agent(strings args) {
 	if (!check_args(args, 3)) return false;
-	agent a(args[1], args[2], args.size() > 3 ? args[3] : "");
+	agent a(args[1], args[2], concat_rest(args, 3));
 	p("register_agent ") << a.name << ' ' << a.other_name << endl;
 	bool r;
 	if (!(r = protocol::register_agent(a))) p("register_agent ERROR: ")
@@ -91,6 +116,7 @@ bool repl::register_agent(strings args) {
 
 bool repl::login(strings args) {
 	if (!check_args(args, 3)) return false;
+	p("login ") << args[1] << endl;
 	session_id id = protocol::login((agent_id)args[1], args[2]);
 	if (id == session_id{}) { p("access denied") << endl; return false; }
 	sid = id;
@@ -99,25 +125,80 @@ bool repl::login(strings args) {
 }
 
 bool repl::logout() {
+	p("logout") << endl;
 	if (!protocol::logout(sid)) {
 		p("logout ERROR. session_id: ") << sid << endl;
 		return false;
 	}
 	p("logout OK. removing session_id: ") << sid << endl;
 	sid = {};
-	p("logout OK. removing session_id: ") << sid << endl;
 	return true;
 }
 
 bool repl::send(strings args) {
 	if (!check_args(args, 3)) return false;
-	p("send ") << args[1] << ' ' << args[2] << endl;
-	message m{}; m.targets = { args[1] }; m.content = { args[2] };
+	p("send ") << args[1] << ' ' << concat_rest(args, 2) << endl;
+	message m{}; m.targets = { args[1] }; m.content = {concat_rest(args,2)};
 	if (!protocol::send(sid, m)) {
-		p("sent ERROR") << endl;
+		p("send ERROR") << endl;
 		return false;
 	}
-	p("sent OK. message_id: ") << m.id << endl;
+	p("send OK. message_id: ") << m.id << endl;
+	return true;
+}
+
+bool repl::unsend(strings args) {
+	if (!check_args(args, 2)) return false;
+	p("unsend ") << args[1] << endl;
+	message m{}; m.id = { args[1] };
+	if (!protocol::unsend(sid, m)) {
+		p("unsend ERROR") << endl;
+		return false;
+	}
+	p("unsend OK. message_id: ") << m.id << endl;
+	return true;
+
+}
+
+bool repl::update(strings args) {
+	if (!check_args(args, 3)) return false;
+	p("update ") << args[1] << ' ' << concat_rest(args, 2) << endl;
+	auto ms = protocol::fetch<message>(sid, message_ids{ args[1] });
+	if (!ms.size()) return false;
+	ms[0].content = { concat_rest(args, 2) };
+	if (!protocol::update(sid, ms[0])) {
+		p("update ERROR") << endl;
+		return false;
+	}
+	p("update OK. message_id: ") << ms[0].id << endl;
+	return true;
+}
+
+bool repl::notify(strings args) {
+	if (!check_args(args, 2)) return false;
+	p("notify ") << args[1] << endl;
+	notification n{}; n.targets = { args[1] };
+	bool r = protocol::notify(sid, n, [](message_ids ids) {
+		std::cout << "on_notify(" << ids[0] << ")" << endl;
+	});
+	p(r?"notify OK":"notify ERROR")<<endl;
+	return r;
+}
+
+bool repl::unnotify(strings args) {
+	if (!check_args(args, 2)) return false;
+	p("unnotify ") << args[1] << endl;
+	notification n{}; n.targets = { args[1] };
+	if (protocol::unnotify(sid, n)) p("unnotify OK") << endl;
+	else return p("unnotify ERROR") << endl, false;
+	return true;
+}
+
+bool repl::list_notifications() {
+	auto ns = protocol::list_notifications(sid);
+	p("list_notifications") << endl;
+	if (!ns.size()) p("no notifications found.");
+	for (auto n : ns) p("notification ") << n << endl;
 	return true;
 }
 
@@ -143,8 +224,8 @@ size_t repl::count_channels(strings args) {
 }
 
 message_ids repl::query_message_ids(strings args) {
-	p("query_message_ids ") << args<< endl;
-	filter::message f;
+	p("query_message_ids ") << args << endl;
+	message_f f;
 	auto it = args.begin();
 	while (++it != args.end()) {
 		auto filter = *it;
@@ -160,20 +241,20 @@ message_ids repl::query_message_ids(strings args) {
 						.push_back(channel_id(search));
 		else if (filter == "content") f.content = search;
 	}
-	message_ids mids = protocol::query_messages(sid, f);
+	message_ids mids = protocol::query<message>(sid, f);
 	if (!mids.size()) {
 		p("no messages found") << endl;
 		return {};
 	}
-	p("found messages (ids): ");
-	for (message_id& mid : mids) p(mid) << " ";
-	p("") << endl;
+	// p("found messages (ids): ");
+	// for (message_id& mid : mids) p(mid) << " ";
+	// p("") << endl;
 	return mids;
 }
 
 agent_ids repl::query_agent_ids(strings args) {
 	p("query_agents ") << args << endl;
-	filter::agent f;
+	agent_f f;
 	auto it = args.begin();
 	while (++it != args.end()) {
 		auto filter = *it;
@@ -186,20 +267,20 @@ agent_ids repl::query_agent_ids(strings args) {
 		else if (filter == "name") f.name = search;
 		else if (filter == "other_name") f.other_name = search;
 	}
-	agent_ids aids = protocol::query_agents(sid, f);
+	agent_ids aids = protocol::query<agent>(sid, f);
 	if (!aids.size()) {
 		p("no agents found") << endl;
 		return {};
 	}
-	p("found agents (ids): ");
-	for (agent_id& aid : aids) p(aid) << " ";
-	p("") << endl;
+	// p("found agents (ids): ");
+	// for (agent_id& aid : aids) p(aid) << " ";
+	// p("") << endl;
 	return aids;
 }
 
 channel_ids repl::query_channel_ids(strings args) {
 	p("query_channels ") << args << endl;
-	filter::channel f;
+	channel_f f;
 	auto it = args.begin();
 	while (++it != args.end()) {
 		auto filter = *it;
@@ -209,37 +290,37 @@ channel_ids repl::query_channel_ids(strings args) {
 		}
 		auto search = *it;
 		if (filter == "id") f.id = channel_id(search);
-		else if (filter == "op") f.op = search;
+		else if (filter == "creator") f.creator = search;
 		else if (filter == "name") f.name = search;
 	}
-	channel_ids chids = protocol::query_channels(sid, f);
+	channel_ids chids = protocol::query<channel>(sid, f);
 	if (!chids.size()) {
 		p("no channels found") << endl;
 		return {};
 	}
-	p("found channels (ids): ");
-	for (channel_id& chid : chids) p(chid) << " ";
-	p("") << endl;
+	// p("found channels (ids): ");
+	// for (channel_id& chid : chids) p(chid) << " ";
+	// ("") << endl;
 	return chids;
 }
 
 bool repl::query_and_fetch_messages(strings args) {
-	std::vector<message> ms = protocol::fetch_messages(sid,
-							query_message_ids(args));
+	vector<message> ms = protocol::fetch<message>(sid,
+						query_message_ids(args));
 	for (message& m : ms) p(m) << endl;
 	return ms.size();
 }
 
 bool repl::query_and_fetch_agents(strings args) {
-	std::vector<agent> as = protocol::fetch_agents(sid,
-							query_agent_ids(args));
+	vector<agent> as = protocol::fetch<agent>(sid,
+						query_agent_ids(args));
 	for (agent& a : as) p(a) << endl;
 	return as.size();
 }
 
 bool repl::query_and_fetch_channels(strings args) {
-	std::vector<channel> chs = protocol::fetch_channels(sid,
-							query_channel_ids(args));
+	vector<channel> chs = protocol::fetch<channel>(sid,
+						query_channel_ids(args));
 	for (channel& ch : chs) p(ch) << endl;
 	return chs.size();
 }

@@ -12,6 +12,7 @@
 // modified over time by the Author.
 #ifndef __ALPHA_PROTOCOL_H__
 #define __ALPHA_PROTOCOL_H__
+#include <functional>
 
 #include "defs.h"
 #include "agent.h"
@@ -23,29 +24,29 @@ namespace alpha {
 
 namespace protocol {
 
-typedef void (*on_notify)(message_ids&);
+typedef std::function<void(message_ids)> on_notify;
 
 bool register_agent(agent& a);
-//bool unregister_agent(const session_id& sid, agent& a); // TODO
+bool unregister_agent(const session_id& sid, agent& a);
 session_id login(agent_id aid, std::string password);
 bool logout  (const session_id& sid);
-//bool notify  (const session_id& sid, filter::notification& n, on_notify fn);
-//bool unnotify(const session_id& sid, filter::notification& n); // TODO
-//bool ignore  (const session_id& sid, filter::ignoration& i);   // TODO
-//bool unignore(const session_id& sid, filter::ignoration& i);   // TODO
+bool notify  (const session_id& sid, notification& n, on_notify fn);
+bool unnotify(const session_id& sid, notification& n);
+// bool ignore  (const session_id& sid, ignoration& i); // TODO
+// bool unignore(const session_id& sid, ignoration& i); // TODO
 bool send    (const session_id& sid, message& m);
-//bool unsend  (const session_id& sid, message& m);              // TODO
-//bool update  (const session_id& sid, message& m);              // TODO
+bool unsend  (const session_id& sid, message& m);
+bool update  (const session_id& sid, message& m);
 bool create_channel(const session_id& sid, channel& ch);
 
-//bool list_notifications(const session_id& sid, std::vector<filter::notification>& r);
-//bool list_ignorations  (const session_id& sid, std::vector<filter::ignoration>&   r);
+std::vector<notification> list_notifications(const session_id& sid);
+// std::vector<ignoration>   list_ignorations  (const session_id& sid); // TODO
 
 template<typename T>
 unique_ids query(const session_id& sid, const filter& f);
-template <typename T>
+template<typename T>
 std::vector<T> fetch(const session_id &sid, std::vector<unique_id> ids);
-template <typename T>
+template<typename T>
 std::vector<T> query_fetch(const session_id& sid, const filter& f);
 
 }

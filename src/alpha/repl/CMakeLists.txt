@@ -19,19 +19,20 @@ install_and_activate_emsdk(${EMSDK_DIR})
 
 set(ALPHA_REPL_HEADERS
 	repl.h
-	../protocol.h
 	../agent.h
-	../message.h
 	../channel.h
 	../defs.h
 	../filter.h
-	../agent.h
+	../message.h
+	../protocol.h
+	../storage.h
 )
 set(ALPHA_REPL_SOURCES
-	../protocol_nonet.cpp
-	../output.cpp
-	repl.cpp
 	main.cpp
+	repl.cpp
+	../filter.cpp
+	../output.cpp
+	../protocol_nonet.cpp
 )
 set(ALPHA_REPL_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"

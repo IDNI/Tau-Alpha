@@ -1,4 +1,4 @@
-register foo bar baz
+register foo bar Baz
 register joe pass jo
 
 login 2 pass
@@ -6,19 +6,37 @@ login 2 pass
 create_channel general
 create_channel devel
 
+notify 1
+notify 3
+
+list_notifications
+
 send 1 test11
 send 1 test12
 send 2 test21
+
+unnotify 3
+
 send 1 test13
 send 2 test22
 send 3 test31
 
-qa
-qch
-qm
+list_notifications
+
+unsend 4
+
+update 1 test11updated
+
+unnotify 1
+
+list_notifications
+
+query_agents
+query_channels
+query_messages
 
 qa id 2
-qa name jo
+qa name joe
 qa other_name az
 
 qch name gene
@@ -26,3 +44,16 @@ qch id 2
 
 qm target 1
 qm author 1
+
+qa other_name baz
+qa other_name Baz
+qa other_name az
+qa other_name ba
+qa other_name c
+
+qa other_name ^[bB]az$
+qa other_name b.z
+qa other_name ^b$
+
+logout
+

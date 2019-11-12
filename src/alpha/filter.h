@@ -25,7 +25,7 @@ namespace alpha {
 
 struct filter { };
 
-struct terminal : public filter { terminal() {} };
+struct terminal : public filter {};
 
 struct group : public filter {
 	typedef std::vector<filter> filters;
@@ -55,7 +55,7 @@ struct message_f : public terminal {
 	channel_ids targets;   // {} = null
 	std::string content;   // {} = null
 	//std::vector<message_id> reacts_to; // {} = null
-	virtual bool match(const message& m) const;
+	bool match(const message& m) const;
 };
 
 typedef message_f notification;
@@ -64,10 +64,10 @@ typedef message_f ignoration;
 
 struct channel_f : public terminal {
 	channel_id id;
-	agent_id op;
+	agent_id creator;
 	std::string name;
 	//timerange created;
-	virtual bool match(const channel& ch) const;
+	bool match(const channel& ch) const;
 };
 
 struct agent_f : public terminal {
@@ -75,8 +75,16 @@ struct agent_f : public terminal {
 	std::string name;
 	std::string other_name;
 	//std::string email;
-	virtual bool match(const agent& a) const;
+	bool match(const agent& a) const;
 };
+
+bool operator<(const message_f&, const message_f&);
+bool operator<(const channel_f&, const channel_f&);
+bool operator<(const agent_f&, const agent_f&);
+
+std::ostream& operator<<(std::ostream& os, const message_f& mf);
+std::ostream& operator<<(std::ostream& os, const channel_f& chf);
+std::ostream& operator<<(std::ostream& os, const agent_f& af);
 
 }
 

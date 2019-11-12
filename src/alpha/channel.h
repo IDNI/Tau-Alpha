@@ -20,7 +20,7 @@ namespace alpha {
 
 struct channel : object {
 	channel_id id;
-	agent_id op;
+	agent_id creator;
 	std::string name;
 	//timestamp created;
 	channel() = default;

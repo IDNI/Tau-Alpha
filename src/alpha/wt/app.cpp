@@ -114,6 +114,16 @@ app::app(const WEnvironment& env) : WApplication(env) {
 	channel ch2 = channel("channel2");
 	protocol::create_channel(sid, ch2);
 
+	// create notification for channel1 and channel2
+	notification n1; n1.targets = { ch1.id };
+	protocol::notify(sid, n1, [this](message_ids ids) {
+		log("on_notify 1: ")<<ids[0];
+	});
+	notification n2; n2.targets = { ch2.id };
+	protocol::notify(sid, n2, [this](message_ids ids) {
+		log("on_notify 2: ")<<ids[0];
+	});
+
 	// set boostrap theme
 	const string *themePtr = env.getParameter("theme");
 	string theme;

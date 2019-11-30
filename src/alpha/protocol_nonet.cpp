@@ -12,7 +12,6 @@
 // modified over time by the Author.
 
 // proof of concept dummy impl of the alpha network layer
-// no persistence
 
 #include <iostream>
 #include <sstream>
@@ -21,6 +20,7 @@
 #include <algorithm>
 
 #include "protocol.h"
+#include "../tml/relationfile.h"
 
 namespace alpha {
 
@@ -30,6 +30,7 @@ using std::map;
 using std::ostream;
 using std::is_same;
 using std::endl;
+using std::chrono::system_clock;
 
 struct session {
 	session_id id;
@@ -39,20 +40,25 @@ struct session {
 
 namespace protocol {
 
+tml::relationfile agent_db(  "agent",   4, "storage/agent.dtml");
+tml::relationfile session_db("session", 3, "storage/session.dtml");
+tml::relationfile channel_db("channel", 4, "storage/channel.dtml");
+tml::relationfile message_db("message", 6, "storage/message.dtml");
+
+void init() {
+	agent_db.load();
+	session_db.load();
+	channel_db.load();
+	message_db.load();
+}
+
 vector<agent>   agents{};
 vector<session> sessions{};
 vector<channel> channels{};
 vector<message> messages{};
 
-map<agent_id,   agent*>   agents_map{};
-map<session_id, session*> sessions_map{};
-map<channel_id, channel*> channels_map{};
-map<message_id, message*> messages_map{};
-
 map<notification, vector<on_notify>> notifications_map{};
 vector<ignoration> ignorations{};
-
-map<channel_id, vector<message_id>> channel_messages_map{};
 
 enum object_types { AGENT, CHANNEL, MESSAGE };
 
@@ -65,10 +71,10 @@ constexpr int object_type(){
 }
 
 template <typename T>
-constexpr vector<T>& objects() {
-	if constexpr(is_same<T,agent>::value)   return agents;
-	if constexpr(is_same<T,channel>::value) return channels;
-	if constexpr(is_same<T,message>::value) return messages;
+constexpr tml::relationfile& db() {
+	if constexpr(is_same<T,agent>::value)   return agent_db;
+	if constexpr(is_same<T,channel>::value) return channel_db;
+	if constexpr(is_same<T,message>::value) return message_db;
 	throw 0;
 }
 
@@ -84,110 +90,91 @@ template <typename T>
 ostream& info(T v) { return std::cout << "nonet/" << v << ": "; }
 
 bool register_agent(agent &a) {
-	for (auto& sa : agents)
-		if (sa.name == a.name) {
-			info("register_agent")
-				<< "agent with such name already exists.";
-			return false;
-		}
-	static size_t _id{0};
-	std::stringstream ss; ss << ++_id;
-	agent_id aid = ss.str();
-	// info("register_agent")<<"("<<aid<<") "<<a.name<<endl;
+	//info("register_agent")<<" "<<a.name<<endl;
+	if (agent_db.exists(a.name, 1)) {
+		info("register_agent")
+			<< "agent with such name already exists.";
+		return false;
+	}
+
+	std::stringstream ss;
+	ss << agent_db.max()+1;
+	agent_id aid(ss.str());
+
 	a.id = aid;
-	agents.push_back(a);
-	agents_map.emplace(aid, &(agents.back()));
+	a.created = system_clock::now();
+	agent_db.insert(a.id, a.name, a.other_name, print_date(a.created));
 	return true;
 }
 
-session_id login(agent_id aid, string password) {
-	auto it = agents_map.find(aid);
-	if (it == agents_map.end()) {
+session_id login(agent_id aid) {
+	tml::row ar = agent_db.find(aid);
+	if (!ar.size()) {
 		info("login")<<"unknown agent_id "<<aid<<endl;
 		return {};
 	}
-	agent* a = it->second;
-
-	for (auto& s : sessions) if (s.a.id == aid) {
+	agent a(ar);
+	tml::row sr = session_db.find(aid, 1);
+	if (sr.size()) {
 		info("login")<<"agent "<<aid
-		<<" already logged in with session_id: "<<s.id<<endl;
-		return s.id;
+		<<" already logged in with session_id: "<<sr[0]<<endl;
+		return sr[0];
 	}
 
-	if (password != a->password) {
-		info("login")<<"wrong password"<<endl;
-		return {};
-	}
-
-	static size_t _id{0};
-	std::stringstream ss; ss << ++_id;
+	std::stringstream ss; ss << session_db.max()+1;
 	session_id sid{ss.str()};
-	sessions.emplace_back(sid, *a);
-	sessions_map.emplace(sid, &(sessions.back()));
-	// info("login")<<"("<<_id<<") "<<a->name<<" session "<<sid<<endl;
+
+	session_db.insert(sid, aid, now());
+
 	return sid;
 }
 
 bool logout(const session_id &sid) {
-	auto it = sessions_map.find(sid);
-	if (it == sessions_map.end()) {
+	tml::row sr = session_db.find(sid);
+	if (!sr.size()) {
 		info("logout")<<"unknown session_id "<<sid<<endl;
 		return false;
 	}
-	// info("logout")<<it->second->a.name
-	// 	<<" ("<<it->second->a.id<<")"<<endl;
-	for (auto sit = sessions.begin(); sit != sessions.end(); ++sit)
-		if (sit->id == it->second->id) {
-			sessions_map.erase(it);
-			sessions.erase(sit);
-			return true;
-		}
-	info("logout")<<"session in map but not in list "<<sid<<endl;
-	throw 0;
-	return false;
+	session_db.erase(sid);
+	return true;
 }
 
 bool loggedin(const session_id &sid) {
-	// info("loggedin") << "sid: " << sid << " t/f:"
-	// << (sessions_map.find(sid) != sessions_map.end()) << endl;
-	return sessions_map.find(sid) != sessions_map.end();
+	return session_db.find(sid).size();
 }
 
 bool logged_agent(const session_id &sid, agent &a) {
-	auto it = sessions_map.find(sid);
-	if (it == sessions_map.end()) {
-		return false;
-	}
-	a = it->second->a;
+	tml::row sr = session_db.find(sid);
+	if (sr.size() <= 1) return false;
+	tml::row ar = agent_db.find(sr[1]);
+	a = agent(ar);
 	return true;
 }
 
 bool unregister_agent(const session_id& sid, agent& a) {
 	if (!loggedin(sid)) return false;
-	info("unregister_agent")<<"("<<a.id<<") "<<a.name<<endl;
-	auto it = agents_map.find(a.id);
-	auto ait = agents.begin();
-	for (; ait != agents.end(); ++ait) if (ait->id == a.id) break;
-	if (ait != agents.end()) agents.erase(ait);
-	if (it != agents_map.end()) agents_map.erase(it);
+	// info("unregister_agent")<<"("<<a.id<<") "<<a.name<<endl;
+	agent_db.erase(a.id);
 	return true;
 }
 
 bool create_channel(const session_id& sid, channel& ch) {
 	if (!loggedin(sid)) {
-		info("send") << "not logged in. cannot send";
+		info("create_channel")<<" not logged in. cannot create channel.";
 		return false;
 	}
 
-	static size_t _id{0};
-	std::stringstream ss; ss << ++_id;
-	// info("create_channel")<<"("<<_id<<") "<<ch.name<<endl;
+	std::stringstream ss; ss << channel_db.max()+1;
 	ch.id = ss.str();
+
 	agent a;
-	logged_agent(sid, a);
+	if (!logged_agent(sid, a)) {
+		info("create_channel")<<" cannot find logged agent.";
+		return false;
+	}
 	ch.creator = a.id;
-	channels.push_back(ch);
-	channels_map.emplace(ch.id, &(channels.back()));
+	ch.created = system_clock::now();
+	channel_db.insert(ch.id, ch.creator, ch.name, print_date(ch.created));
 	return true;
 }
 
@@ -204,51 +191,49 @@ bool send(const session_id &sid, message& m) {
 		info("send") << "not logged in. cannot send";
 		return false;
 	}
-	static size_t _id{0};
-	std::stringstream ss; ss << ++_id;
-	//info("send")<<"("<<_id<<") "<<m.subject<<": "<<m.content<<endl;
+
+	std::stringstream ss; ss << message_db.max()+1;
 	m.id = ss.str();
+	//info("send")<<"("<<m.id<<") "<<m.subject<<": "<<m.content<<endl;
 	m.author = a.id;
-	messages.push_back(m);
-	messages_map.emplace(m.id, &(messages.back()));
+	m.created = system_clock::now();
+
+	ss.str("");
+	for (auto it = m.targets.begin(); it != m.targets.end(); ++it)
+		ss << (it != m.targets.begin() ? "," : "") << *it;
+	string targets = ss.str();
+
+	message_db.insert(m.id, m.author, targets, m.subject, m.content, now());
 	check_notifications(m);
 	return true;
 }
 
 bool unsend(const session_id &sid, message& m) {
 	if (!loggedin(sid)) return false;
-	auto it = messages_map.find(m.id);
-	if (it != messages_map.end()) {
-		auto mit = messages.begin();
-		for (; mit != messages.end(); ++mit)
-			if (mit->id == m.id) {
-				messages.erase(mit);
-				break;
-			}
-		messages_map.erase(it);
-		check_notifications(m);
-	}
+	message_db.erase(m.id);
+	check_notifications(m);
 	return true;
 }
 
 bool update(const session_id &sid, message& m) {
 	if (!loggedin(sid)) return false;
-	auto it = messages_map.find(m.id);
-	if (it != messages_map.end()) {
-		auto mit = messages.begin();
-		for (; mit != messages.end(); ++mit)
-			if (mit->id == m.id) {
-				mit->targets = m.targets;
-				mit->subject = m.subject;
-				mit->content = m.content;
-				check_notifications(m);
-				break;
-			}
-	}
+
+	tml::row mr = message_db.find(m.id);
+	if (!mr.size()) return false; // no such message exists
+
+	message_db.erase(m.id);
+
+	std::stringstream ss;
+	for (auto it = m.targets.begin(); it != m.targets.end(); ++it)
+		ss << (it != m.targets.begin() ? "," : "") << *it;
+	string targets = ss.str();
+
+	message_db.insert(mr[0], mr[1], targets, m.subject, m.content, mr[5]);
+	check_notifications(m);
 	return true;
 }
 
-bool notify (const session_id& sid, notification& n, on_notify fn) {
+bool notify(const session_id& sid, notification& n, on_notify fn) {
 	if (!loggedin(sid)) return false;
 	auto it = notifications_map.find(n);
 	if (it != notifications_map.end()) it->second.push_back(fn);
@@ -256,7 +241,7 @@ bool notify (const session_id& sid, notification& n, on_notify fn) {
 	return true;
 }
 
-bool unnotify (const session_id& sid, notification& n) {
+bool unnotify(const session_id& sid, notification& n) {
 	if (!loggedin(sid)) return false;
 	auto it = notifications_map.find(n);
 	if (it != notifications_map.end()) notifications_map.erase(it);
@@ -274,8 +259,11 @@ template<typename T> // query for ids by filter
 unique_ids query(const session_id& sid, const filter& f) {
 	if (!loggedin(sid)) return {};
 	unique_ids r;
-	for (T& o : objects<T>())
-		if (match_filter(f, o))	r.push_back(o.id);
+	tml::table t = db<T>().get_relation().get_table();
+	for (const auto& row : t) {
+		T o(row);
+		if (match_filter(f, o)) r.push_back(o.id);
+	}
 	return r;
 }
 
@@ -283,9 +271,10 @@ template <typename T> // fetch objects by ids
 vector<T> fetch(const session_id &sid, vector<unique_id> ids) {
 	if (!loggedin(sid)) return {};
 	vector<T> r;
-	for (auto& id : ids)
-		for (T o : objects<T>())
-			if (o.id == id) r.push_back(o);
+	for (auto& id : ids) {
+		tml::row row = db<T>().find(id);
+		if (row.size()) r.push_back(T(row));
+	}
 	return r;
 }
 
@@ -293,8 +282,11 @@ template<typename T> // query for objects by filter
 vector<T> query_fetch(const session_id& sid, const filter& f) {
 	if (!loggedin(sid)) return {};
 	vector<T> r;
-	for (T& o : objects<T>())
-		if (match_filter(f, o))	r.push_back(o);
+	const tml::table& t = db<T>().get_relation().get_table();
+	for (auto row : t) {
+		T o(row);
+		if (match_filter(f, o)) r.push_back(o);
+	}
 	return r;
 }
 

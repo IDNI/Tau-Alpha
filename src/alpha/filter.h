@@ -49,7 +49,7 @@ struct message_f : public terminal {
 	message_id id; // 0 = null
 	agent_id author; // 0/"" = null
 	std::string subject; // "" = null
-	//timerange created; // { 0, 0 } is null
+	timerange created; // { 0, 0 } is null
 	//timerange publish; // should not match for messages published in
 	//timerange valid;   // ...the future if not authored by the agent
 	channel_ids targets;   // {} = null
@@ -66,7 +66,7 @@ struct channel_f : public terminal {
 	channel_id id;
 	agent_id creator;
 	std::string name;
-	//timerange created;
+	timerange created;
 	bool match(const channel& ch) const;
 };
 
@@ -75,6 +75,7 @@ struct agent_f : public terminal {
 	std::string name;
 	std::string other_name;
 	//std::string email;
+	timerange created;
 	bool match(const agent& a) const;
 };
 

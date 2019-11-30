@@ -7,6 +7,7 @@
 	<message id="detail_msg_tpl">
 		<h3 class="message-subject">${subject}</h3>
 		<div class="message-author">${author}</div>
+		<div class="message-created">${created}</div>
 		<div class="message-content">${content}</div>
 	</message>
 	<message id="form_msg_tpl">${post_form}</message>

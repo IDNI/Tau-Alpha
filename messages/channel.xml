@@ -2,7 +2,8 @@
 <messages>
 	<message id="channel_tpl">
 		<h2 class="channel-name">${name}</h2>
-		<div class="channel-owner">owner: ${op}</div>
+		<div class="channel-creator">creator: ${creator}</div>
+		<div class="channel-created">created: ${created}</div>
 		<div class="channel-messages">${messages}</div>
 		<div class="channel-post-form">${post_form}</div>
 	</message>

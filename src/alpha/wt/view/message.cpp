@@ -60,9 +60,12 @@ void message::render_form() {
 
 void message::bind_data() {
 	if (!sm) return;
-	bindWidget("author",  make_unique<agent>(agent_rt::SHORT, sm->author));
+	auto a = app::instance()->agents()->get(sm->author).get();
+	bindWidget("author",  make_unique<agent>(agent_rt::SHORT, a));
 	bindWidget("subject", make_unique<WText>(sm->subject));
 	bindWidget("content", make_unique<WText>(sm->content));
+	std::stringstream ss; ss << sm->created;
+	bindWidget("created", make_unique<WText>(ss.str()));
 }
 
 void message::send() {

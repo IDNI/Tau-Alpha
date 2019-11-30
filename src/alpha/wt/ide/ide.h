@@ -27,6 +27,7 @@
 #include <Wt/WToolBar.h>
 #include <Wt/WText.h>
 
+#include "../../config.h"
 #include "../splitjs.h"
 #include "../TML_editor.h"
 #include "../workspace.h"
@@ -55,6 +56,8 @@ private:
 	status status_ = INIT;
 	bool changed_ = false;      // has source been changed since last run?
 
+	int tabular_tabs_index{0};
+
 	menu* menu_;
 	toolbar* toolbar_;
 	splitjs* ui_;
@@ -80,6 +83,8 @@ private:
 	Wt::JSignal<>output_finished_;
 	Wt::JSignal<std::string, std::string> set_tab_text_;
 
+	config cfg;
+
 	void runtime_clear();
 	void runtime_frontend_load();
 	void runtime_before() {
@@ -91,6 +96,8 @@ private:
 	void runtime_backend() { runtime_backend(editor_->getText()); }
 	void runtime_backend(std::string prog);
 	void runtime_after() { refresh_tabs(); };
+
+	void raw_term_to_tables(const raw_term& t);
 
 	// UI updates
 	void elapsed(double ms) {

@@ -20,15 +20,14 @@
 #include "channel.h"
 #include "filter.h"
 
-namespace alpha {
-
-namespace protocol {
+namespace alpha::protocol {
 
 typedef std::function<void(message_ids)> on_notify;
 
+void init();
 bool register_agent(agent& a);
 bool unregister_agent(const session_id& sid, agent& a);
-session_id login(agent_id aid, std::string password);
+session_id login(agent_id aid);
 bool logout  (const session_id& sid);
 bool notify  (const session_id& sid, notification& n, on_notify fn);
 bool unnotify(const session_id& sid, notification& n);
@@ -50,7 +49,4 @@ template<typename T>
 std::vector<T> query_fetch(const session_id& sid, const filter& f);
 
 }
-
-}
-
 #endif

@@ -27,6 +27,7 @@ public:
 	storage(const session_id& sid) : sid(sid) {}
 	item get(const unique_id& id);
 	item get(const filter &f);
+	void set_sid(const session_id& newsid) { sid = newsid; }
 	std::vector<item> get_list(const unique_ids &ids);
 	std::vector<item> get_list(const filter &f); //size_t /*limit = 0*/);
 };

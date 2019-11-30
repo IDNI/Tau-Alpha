@@ -21,20 +21,26 @@ namespace alpha::wt::ide {
 typedef std::function<void()> on_click;
 
 struct toolbar : public Wt::WToolBar {
-	toolbar(const on_click& runtime_backend, const on_click& runtime_frontend) {
+	toolbar(const bool enabled_backend, const on_click& runtime_backend,
+		const bool enabled_frontend, const on_click& runtime_frontend)
+	{
 #ifndef DISABLE_BACKEND_EXECUTION
+	if (enabled_backend) {
 		auto bbtn = std::make_unique<Wt::WPushButton>(tr("RUN"));
 		bbtn->clicked().connect([runtime_backend](){
 							runtime_backend(); });
 		run_backend_btn_ = bbtn.get();
 		addButton(move(bbtn));
+	}
 #endif
 #ifndef DISABLE_FRONTEND_EXECUTION
+	if (enabled_frontend) {
 		auto fbtn = std::make_unique<Wt::WPushButton>(tr("RUN JS"));
 		fbtn->clicked().connect([runtime_frontend](){
 							runtime_frontend(); });
 		run_frontend_btn_ = fbtn.get();
 		addButton(move(fbtn));
+	}
 #endif
 	}
 	Wt::WPushButton* run_backend_btn_;

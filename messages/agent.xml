@@ -6,23 +6,6 @@
 	<message id="detail_agent_tpl">
 		<h2 class="agent-header">${name} (${other_name})</h2>
 		<h3 class="agent-id">${id}</h3>
-	</message>
-	<message id="edit_agent_tpl">
-		<div class="row">
-			<label for="name">Name:</label>
-        		<input type="text" name="name" id="name" autofocus="true" required="true" />
-		</div>
-		<div class="row">
-			<label for="password">Password:</label>
-        		<input type="password" name="password" id="password" required="true" />
-		</div>
-		<div class="row">
-			<label for="other_name">Other name (real, given...):</label>
-        		<input type="text" name="other_name" id="other_name" />
-		</div>
-		<div class="row">
-			<label for="email">Email:</label>
-        		<input type="email" name="email" id="email" />
-		</div>
+		<div>registered: ${created}</div>
 	</message>
 </messages>

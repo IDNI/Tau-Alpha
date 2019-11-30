@@ -12,6 +12,7 @@
 // modified over time by the Author.
 #ifndef __ALPHA_MESSAGE_H__
 #define __ALPHA_MESSAGE_H__
+#include <sstream>
 
 #include "defs.h"
 
@@ -24,11 +25,28 @@ struct message : public object {
 	std::string subject;
 	file content;
 //	file formal;
-//	timestamp created;
+	timestamp created;
 //	timestamp publish;
 //	timestamp valid;
 //	message_ids reacts_to;
-//	message() {};
+	message() = default;
+	message(strings e) {
+		std::stringstream ss;
+		switch (e.size()) {
+			case 6: ss.str(e[5]); ss >> created;
+				/* fall through */
+			case 5: content = e[4];
+				/* fall through */
+			case 4: subject = e[3];
+				/* fall through */
+			case 3: targets = split(e[2]);
+				/* fall through */
+			case 2: author = e[1];
+				/* fall through */
+			case 1: id = e[0];
+		}
+	};
+
 };
 
 std::ostream& operator<<(std::ostream& os, const message& m);

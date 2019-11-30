@@ -1,7 +1,7 @@
-register foo bar Baz
-register joe pass jo
+register foo Bar
+register joe Joey
 
-login 2 pass
+login 2
 
 create_channel general
 create_channel devel

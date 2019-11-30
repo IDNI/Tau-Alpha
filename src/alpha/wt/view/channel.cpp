@@ -28,8 +28,9 @@ using std::make_shared;
 using std::move;
 using agent_rt = view::agent::render_type;
 using message_rt = view::message::render_type;
+using alpha::sp_message;
 
-channel::channel(sp_channel sch) : sch(sch) {
+channel::channel(alpha::channel* ch, bool form) : ch(ch), form(form) {
 	app::instance()->messageResourceBundle().use("messages/channel");
 	addStyleClass("channel");
 	render();
@@ -41,27 +42,46 @@ void channel::render() {
 }
 
 void channel::bind_data() {
-	if (!sch) return;
-	bindWidget("creator",   make_unique<agent>(agent_rt::SHORT, sch->creator));
-	bindWidget("name", make_unique<WText>(sch->name));
+	if (!ch) return;
+	auto c = app::instance()->agents()->get(ch->creator).get();
+	bindWidget("creator", make_unique<agent>(agent_rt::SHORT, c));
+	bindWidget("name", make_unique<WText>(ch->name));
+	std::stringstream ss; ss << ch->created;
+	bindWidget("created", make_unique<WText>(ss.str()));
+
 	bind_messages();
-	sp_message post = make_shared<alpha::message>();
-	post->targets.push_back(sch->id);
-	post_form = bindWidget("post_form", make_unique<message>(
-		message_rt::FORM, post,	[this](){ bind_messages(); }
-	));
+	if (form) {
+		sp_message post = make_shared<alpha::message>();
+		post->targets.push_back(ch->id);
+		post_form = bindWidget("post_form", make_unique<message>(
+			message_rt::FORM, post,	[this](){ bind_messages(); }
+		));
+	} else {
+		bindWidget("post_form", make_unique<WText>(""));
+		post_form = 0;
+	}
 }
+
+struct created_before {
+	inline bool operator() (const sp_message& m1, const sp_message& m2) {
+		return (m1->created < m2->created);
+	}
+};
 
 void channel::bind_messages() {
 	auto pmsgs = make_unique<WContainerWidget>();
 	auto msgs = pmsgs.get();
 	bindWidget("messages", move(pmsgs));
-	message_f f{}; f.targets = { sch.get()->id };
+	message_f f{}; f.targets = { ch->id };
 	auto ms = app::instance()->messages()->get_list(f);
 	if (!ms.size())	msgs->addWidget(make_unique<WText>(tr("no msgs")));
-	else for (sp_message &m : ms) {
-		msgs->addWidget(make_unique<message>(message_rt::DETAIL, m));
-		msgs->addWidget(make_unique<WBreak>());
+	else {
+		sort(ms.begin(), ms.end(), created_before());
+		for (sp_message &m : ms) {
+			msgs->addWidget(make_unique<message>(
+							message_rt::DETAIL, m));
+			msgs->addWidget(make_unique<WBreak>());
+		}
 	}
 }
 

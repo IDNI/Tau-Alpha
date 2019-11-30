@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "../../tml/datafile.h"
+#include "../../tml/relationfile.h"
 #include "../protocol.h"
 
 namespace alpha {
@@ -65,9 +67,8 @@ class repl {
 	bool query_and_fetch_agents(strings args);
 	bool query_and_fetch_channels(strings args);
 
-
 public:
-	repl(int argc, char** argv) : argc(argc), argv(argv) {};
+	repl(int argc, char** argv);
 	int run();
 };
 

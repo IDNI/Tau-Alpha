@@ -28,20 +28,30 @@
 #include "view/agent.h"
 #include "view/message.h"
 #include "view/channel.h"
+#include "view/register_form.h"
+#include "view/identities.h"
+#include "view/channels.h"
 #include "../protocol.h"
+
+#include "../config.h"
+
+#include "../../tml/relationfile.h"
+
+namespace alpha::wt {
 
 using namespace Wt;
 using std::unique_ptr;
 using std::make_unique;
 using std::make_shared;
+using std::wstring;
 using std::string;
 using std::cerr;
 using std::endl;
 
-namespace alpha::wt {
-
 using agent_rt   = view::agent::render_type;
 using message_rt = view::message::render_type;
+
+std::unique_ptr<config> app::cfg = 0;
 
 WString tr(string s) { return WString::tr(s); }
 
@@ -49,23 +59,78 @@ unique_ptr<WApplication> create_app(const WEnvironment& env) {
 	return make_unique<app>(env);
 }
 
-up_widget app::view_profile() {
-	return make_unique<view::agent>(agent_rt::SHORT, user_);
+up_widget app::view_identities() {
+	auto up = make_unique<view::identities>(
+		tml::relationfile("identity", 3, "storage/identity.tml"),
+		[this](session_id newsid, agent_id newaid){
+			sid = newsid;
+			aid = newaid;
+			log("info")<<" new session: "<<sid<<" user: "<<aid;
+			// console_log("new_session: "+sid+" user: "+aid);
+
+			agents_  ->set_sid(sid);
+			channels_->set_sid(sid);
+			messages_->set_sid(sid);
+
+			agent_ = agents()->get(aid).get();
+			profile_->set_agent(agent_);
+
+			channel_id chid = channels_view->get_channel_id();
+			auto ch = channels()->get(chid);
+			channel_view->set_channel(ch.get());
+			channels_view->update_list();
+			app::cfg->select("identity", aid);
+		}
+	);
+	up->set_agent(app::cfg->selected("identity"));
+	return up;
 }
 
+up_widget app::view_channels() {
+	chid = app::cfg->selected("channel");
+	auto on_update = [this](channel_id newchid) {
+		chid = newchid;
+		// log("info")<<" view channel: "<<chid;
+		// console_log("view channel: "+chid);
+		channel_view->set_channel(channels()->get(chid).get());
+		app::cfg->select("channel", newchid);
+		menu_->select(5);
+	};
+	auto up = make_unique<view::channels>(chid, on_update, on_update);
+	channels_view = up.get();
+	return up;
+}
+
+up_widget app::view_registration() {
+	return make_unique<view::register_form>();
+}
+
+up_widget app::view_profile() {
+	agent_ = agents()->get(aid).get();
+	auto profile = make_unique<view::agent>(agent_rt::DETAIL, agent_);
+	profile_ = profile.get();
+	return profile;
+}
+
+up_widget app::view_aggregator() {
+	return make_unique<view::channel>(&aggregator_, false);
+}
+
+
 up_widget app::view_channel(const channel_id& chid = channel_id{}) {
-	return make_unique<view::channel>(chid == channel_id{}
-		? aggr_ // use aggregator feed if no chid
-		: channels()->get(chid));
+	auto up = make_unique<view::channel>(channels()->get(chid).get());
+	channel_view = up.get();
+	return up;
 }
 
 up_widget app::view_channel_by_name(const string& name = "") {
-	sp_channel& ch = aggr_;
-	if (name != "") {
-		channel_f f{}; f.name = name;
-		ch = channels()->get(f);
-	}
-	return make_unique<view::channel>(ch);
+	if (name != "") return 0;
+	channel_f f{}; f.name = name;
+	alpha::channel* ch = channels()->get(f).get();
+	if (!ch) return 0;
+	auto up = make_unique<view::channel>(ch);
+	channel_view = up.get();
+	return up;
 }
 
 up_widget app::view_ide() {
@@ -74,6 +139,12 @@ up_widget app::view_ide() {
 
 int app::start(int argc, char** argv) {
 	try {
+		if (!app::cfg.get()) app::cfg = make_unique<config>(
+			"config/alpha.dtml", "config/alpha.ptml");
+		app::cfg->load();
+
+		protocol::init();
+
 		WServer server(argv[0]);
 		server.setServerConfiguration(argc, argv, WTHTTP_CONFIGURATION);
 		server.addEntryPoint(EntryPointType::Application, &create_app);
@@ -92,37 +163,21 @@ int app::start(int argc, char** argv) {
 }
 
 app::app(const WEnvironment& env) : WApplication(env) {
-	// register and login user john TODO: register form
-	user_ = make_shared<agent>("john", "secret", "John Doe");
-	auto a = user_.get();
-	bool r = protocol::register_agent(*a);       // register
-	if (!r) a->id = "1";                         // or set agents id
-	sid = protocol::login(a->id, a->password);
-	log("session id: ", sid);
 
 	// storages for network objects
 	agents_   = make_unique<storage<agent>>(sid);
 	channels_ = make_unique<storage<channel>>(sid);
 	messages_ = make_unique<storage<message>>(sid);
 
-	// aggregator channel
-	aggr_ = make_shared<channel>("aggr");
-
-	// create testing channels
-	channel ch1 = channel("channel1");
-	protocol::create_channel(sid, ch1);
-	channel ch2 = channel("channel2");
-	protocol::create_channel(sid, ch2);
-
 	// create notification for channel1 and channel2
-	notification n1; n1.targets = { ch1.id };
-	protocol::notify(sid, n1, [this](message_ids ids) {
-		log("on_notify 1: ")<<ids[0];
-	});
-	notification n2; n2.targets = { ch2.id };
-	protocol::notify(sid, n2, [this](message_ids ids) {
-		log("on_notify 2: ")<<ids[0];
-	});
+	// notification n1; n1.targets = { ch1.id };
+	// protocol::notify(sid, n1, [this](message_ids ids) {
+	// 	log("on_notify 1: ")<<ids[0];
+	// });
+	// notification n2; n2.targets = { ch2.id };
+	// protocol::notify(sid, n2, [this](message_ids ids) {
+	//	log("on_notify 2: ")<<ids[0];
+	// });
 
 	// set boostrap theme
 	const string *themePtr = env.getParameter("theme");
@@ -181,15 +236,20 @@ void app::create_ui() {
 	auto menu = make_unique<WMenu>(contents.get());
 	//menu->setInternalPathEnabled();
 	//menu->setInternalBasePath("/");
-	add_to_menu(menu.get(), tr("PROFILE"), view_profile());
-	// add_to_menu(menu.get(), tr("FEED"), view_channel());
-	add_to_menu(menu.get(), tr("CHANNEL")+"1",
-					view_channel_by_name("channel1"));
-	add_to_menu(menu.get(), tr("CHANNEL")+"2",
-					view_channel_by_name("channel2"));
-	// add_to_menu(menu.get(), tr("CHANNEL")+"3",
-	// 				view_channel_by_name("channel3"));
-	add_to_menu(menu.get(), tr("IDE"), view_ide());
+	menu_ = menu.get();
+
+	add_to_menu(menu_, tr("REGISTRATION"), view_registration());   // 0
+	auto w_profile = view_profile();
+	auto w_aggregator = view_aggregator();
+	auto w_channel = view_channel();
+	auto w_channels = view_channels();
+	add_to_menu(menu_, tr("IDENTITY"), view_identities());         // 1
+	add_to_menu(menu_, tr("PROFILE"), move(w_profile));            // 2
+	add_to_menu(menu_, tr("CHANNELS"), move(w_channels));          // 3
+	add_to_menu(menu_, tr("FEED"), move(w_aggregator));            // 4
+	add_to_menu(menu_, tr("CHANNEL"), move(w_channel));            // 5
+	if (app::cfg->enabled("IDE"))
+		add_to_menu(menu_, tr("IDE"), view_ide());             // 6
 	//menu_->itemSelectRendered().connect(this, &Home::updateTitle);
 
 	navbar->addMenu(move(menu));

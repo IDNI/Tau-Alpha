@@ -19,9 +19,24 @@ modified over time by the Author.</message>
 <message id="TML IDE">TML IDE</message>
 <message id="profile">profile</message>
 <message id="feed">feed</message>
+<message id="REGISTRATION">REGISTRATION</message>
+<message id="IDENTITY">IDENTITY</message>
 <message id="PROFILE">PROFILE</message>
 <message id="FEED">FEED</message>
 <message id="IDE">IDE</message>
+<message id="CHANNELS">CHANNELS</message>
 <message id="CHANNEL">CHANNEL</message>
+
+<message id="register form">Register new identity</message>
+<message id="label.name">Name</message>
+<message id="label.other_name">Other/Alternative name</message>
+<message id="error.name">Name is required and can consist of a-zA-Z0-9_+-/*</message>
+<message id="submit">submit</message>
+
+<message id="select identity">Select identity</message>
+<message id="label.identity">Identity</message>
+
+<message id="select channel">Select channel</message>
+<message id="create channel">Create channel</message>
 
 </messages>

@@ -18,11 +18,15 @@
 #include <Wt/WEnvironment.h>
 #include <Wt/WString.h>
 #include <Wt/WText.h>
+#include <Wt/WMenu.h>
+
+#include "../config.h"
 
 #include "../storage.h"
 
 #include "view/agent.h"
 #include "view/channel.h"
+#include "view/channels.h"
 #include "view/message.h"
 
 #include "ide/ide.h"
@@ -30,26 +34,16 @@
 namespace alpha::wt {
 
 using up_widget = std::unique_ptr<Wt::WWidget>;
+using sp_widget = std::shared_ptr<Wt::WWidget>;
 
 Wt::WString tr(std::string s);
 
-struct app : public Wt::WApplication {
-	app(const Wt::WEnvironment& env);
-	static int start(int argc, char** argv);
-	sp_agent get_agent(const agent_id& aid);
-	//sp_channel get_channel(const channel_id& chid);
-	//sp_channel get_channel_by_name(const std::string& name);
-	session_id get_session_id() const { return sid; }
-	storage<agent>* agents() const { return agents_.get(); };
-	storage<message>* messages() const { return messages_.get(); };
-	storage<channel>* channels() const { return channels_.get(); };
-	static app* instance() {
-		return dynamic_cast<app*>(Wt::WApplication::instance());
-	};
-private:
+class app : public Wt::WApplication {
 	session_id sid;
-	sp_agent user_;
-	sp_channel aggr_;
+	agent_id aid{};
+	channel_id chid{};
+	agent *agent_{0};
+	channel aggregator_{"aggregator"};
 	std::unique_ptr<storage<agent>> agents_;
 	std::unique_ptr<storage<channel>> channels_;
 	std::unique_ptr<storage<message>> messages_;
@@ -62,12 +56,34 @@ private:
 	void console_log(std::string message) { console_log("info", message); }
 
 	void create_ui();
+	Wt::WMenu* menu_;
 	Wt::WMenuItem* add_to_menu(Wt::WMenu *menu, const Wt::WString& name,
 		up_widget w, up_widget t);
+	up_widget view_registration();
+	up_widget view_identities();
+	up_widget view_channels();
 	up_widget view_profile();
 	up_widget view_ide();
+	up_widget view_aggregator();
 	up_widget view_channel(const channel_id& chid);
 	up_widget view_channel_by_name(const std::string& n);
+
+	view::agent *profile_;
+	view::channels *channels_view;
+	view::channel *channel_view;
+public:
+	static std::unique_ptr<config> cfg;
+
+	app(const Wt::WEnvironment& env);
+	static int start(int argc, char** argv);
+	sp_agent get_agent(const agent_id& aid);
+	session_id get_session_id() const { return sid; }
+	storage<agent>* agents() const { return agents_.get(); };
+	storage<message>* messages() const { return messages_.get(); };
+	storage<channel>* channels() const { return channels_.get(); };
+	static app* instance() {
+		return dynamic_cast<app*>(Wt::WApplication::instance());
+	};
 };
 
 }

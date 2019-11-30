@@ -10,8 +10,8 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#include "ide.h"
 #include "../app.h"
+#include "ide.h"
 
 namespace alpha::wt::ide {
 
@@ -30,8 +30,11 @@ ide::ide() :
 	relation_ensure_(this, "relation_ensure"),
 	relation_set_(this, "relation_out_set"),
 	output_finished_(this, "output_finished"),
-	set_tab_text_(this, "set_tab_text")
+	set_tab_text_(this, "set_tab_text"),
+	cfg(config("config/ide.dtml"))
 {
+	o.autorun = cfg.enabled("autorun");
+	o.linenumbers = cfg.enabled("linenumbers");
 	app *a = (app *) WApplication::instance();
 	a->messageResourceBundle().use("messages/ide", false);
 	//a->set_title(tr("Tau Alpha")+" - "+tr("TML IDE"));
@@ -40,18 +43,19 @@ ide::ide() :
 	render();
 
 #ifndef DISABLE_FRONTEND_EXECUTION
-	runtime_frontend_load();
+	if (cfg.enabled("frontend_execution")) runtime_frontend_load();
 #endif
 
 	editor_->setOption("lineNumbers", "'true'");
 	editor_->onUpdate().connect([this](string){
 		if (o.autorun) {
 #ifndef DISABLE_FRONTEND_EXECUTION
-			runtime_frontend();
+			if (cfg.enabled("frontend_execution"))
+				runtime_frontend();
 #else
 #	ifndef DISABLE_BACKEND_EXECUTION
-			runtime_backend();
-			bdd::gc();
+			if (cfg.enabled("backend_execution"))
+				runtime_backend(), bdd::gc();
 #	endif
 #endif
 		} else changed();
@@ -73,16 +77,18 @@ void ide::render() {
 			o.linenumbers = mi->isChecked();
 			editor_->setOption("lineNumbers", o.linenumbers
 				? "true" : "false");
+			cfg.set_enabled("linenumbers", o.linenumbers);
 		},
 		o.autorun,
 		[this](WMenuItem *mi) -> void {
 			o.autorun = mi->isChecked();
+			cfg.set_enabled("autorun", o.autorun);
 		}
 	));
 
 	toolbar_ = bindWidget("toolbar", make_unique<toolbar>(
-		[this](){ runtime_backend(); },
-		[this](){ runtime_frontend(); }
+		cfg.enabled("backend_execution"),[this](){ runtime_backend(); },
+		cfg.enabled("frontend_execution"),[this](){runtime_frontend(); }
 	));
 
 	ui_ = bindWidget("ui", make_unique<splitjs>(
@@ -96,12 +102,8 @@ void ide::render() {
  	iui_->addStyleClass("splitter_editor");
 
  	editor_ = iui_->first()->addWidget(make_unique<TML_editor>());
-// 	auto c = sc_->second()->addWidget(make_unique<WContainerWidget>());
-// 	c->resize("100%", "100%");
-
 	tabs_ = iui_->second()->addWidget(make_unique<WTabWidget>());
  	tabs_->setStyleClass("tabwidget");
- 	//tabs_->resize("100%", "100%");
 
  	// output tab
  	auto output = make_unique<TML_editor>();
@@ -192,10 +194,9 @@ void ide::runtime_clear() {
 	errors_->clear();
 	binary_->clear();
 	DBG(debug_->clear();)
-	while (tabular_tabs_->count() > 0) {
-		tabular_tabs_->setCurrentIndex(0);
-		tabular_tabs_->removeTab(tabular_tabs_->currentWidget());
-	}
+	tabular_tabs_index = tabular_tabs_ ? tabular_tabs_->currentIndex() : 0;
+ 	tabular_tabs_ = tabular_->addWidget(make_unique<WTabWidget>());
+ 	tabular_tabs_->setStyleClass("tabwidget tabular-tabs");
 	tables_.clear();
 }
 

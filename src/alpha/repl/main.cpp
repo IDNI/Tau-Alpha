@@ -13,6 +13,8 @@
 #include "repl.h"
 
 int main (int argc, char** argv) {
+	setlocale(LC_ALL, "");
+	tml::datafile::init();
 	alpha::repl r(argc, argv);
 	return r.run();
 }

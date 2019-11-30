@@ -26,13 +26,22 @@ set(ALPHA_REPL_HEADERS
 	../message.h
 	../protocol.h
 	../storage.h
+	../../tml/datafile.h
+	../../tml/query.h
+	../../tml/relation.h
+	../../tml/relationfile.h
 )
 set(ALPHA_REPL_SOURCES
 	main.cpp
 	repl.cpp
+	../alpha.cpp
 	../filter.cpp
 	../output.cpp
 	../protocol_nonet.cpp
+	../../tml/datafile.cpp
+	../../tml/query.cpp
+	../../tml/relation.cpp
+	../../tml/relationfile.cpp
 )
 set(ALPHA_REPL_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"

@@ -20,6 +20,10 @@ using std::string;
 using std::vector;
 using std::endl;
 
+repl::repl(int argc, char** argv) : argc(argc), argv(argv) {
+	protocol::init();
+}
+
 string concat_rest(strings args, const size_t from) {
 	std::stringstream ss;
 	for (size_t i = from; i < args.size(); ++i) {
@@ -104,20 +108,24 @@ bool repl::check_args(const strings args, const size_t n_required) const {
 }
 
 bool repl::register_agent(strings args) {
-	if (!check_args(args, 3)) return false;
-	agent a(args[1], args[2], concat_rest(args, 3));
+	auto& l = p("register_agent ") << args.size() << " ";
+	for (auto n : args) l << n << " ";
+	l << (check_args(args, 2) ? "true" : "false");
+	l << std::endl;
+
+	if (!check_args(args, 2)) return false;
+	agent a(args[1], concat_rest(args, 2));
 	p("register_agent ") << a.name << ' ' << a.other_name << endl;
-	bool r;
-	if (!(r = protocol::register_agent(a))) p("register_agent ERROR: ")
-								<< sid << endl;
+	bool r = protocol::register_agent(a);
+	if (!r) p("register_agent ERROR: ") << args[1] << endl;
 	else p("register_agent OK. agent_id: ") << a.id << endl;
 	return r;
 }
 
 bool repl::login(strings args) {
-	if (!check_args(args, 3)) return false;
+	if (!check_args(args, 2)) return false;
 	p("login ") << args[1] << endl;
-	session_id id = protocol::login((agent_id)args[1], args[2]);
+	session_id id = protocol::login((agent_id)args[1]);
 	if (id == session_id{}) { p("access denied") << endl; return false; }
 	sid = id;
 	p("login OK. session_id: ") << id << endl;

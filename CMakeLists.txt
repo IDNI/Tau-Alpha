@@ -29,6 +29,7 @@ set(ALPHA_HEADERS
 	src/alpha/defs.h
 	src/alpha/filter.h
 	src/alpha/message.h
+	src/alpha/config.h
 	src/alpha/protocol.h
 	src/alpha/storage.h
 	src/alpha/wt/app.h
@@ -42,11 +43,20 @@ set(ALPHA_HEADERS
 	src/alpha/wt/ide/toolbar.h
 	src/alpha/wt/view/agent.h
 	src/alpha/wt/view/channel.h
+	src/alpha/wt/view/channels.h
+	src/alpha/wt/view/identities.h
 	src/alpha/wt/view/message.h
+	src/alpha/wt/view/register_form.h
+	src/tml/datafile.h
+	src/tml/query.h
+	src/tml/relation.h
+	src/tml/relationfile.h
 )
 set(ALPHA_SOURCES
 	src/main.cpp
 	src/alpha/filter.cpp
+	src/alpha/common.cpp
+	src/alpha/config.cpp
 	src/alpha/output.cpp
 	src/alpha/protocol_nonet.cpp
 	src/alpha/storage.cpp
@@ -58,7 +68,14 @@ set(ALPHA_SOURCES
 	src/alpha/wt/ide/runtime_frontend.cpp
 	src/alpha/wt/view/agent.cpp
 	src/alpha/wt/view/channel.cpp
+	src/alpha/wt/view/channels.cpp
+	src/alpha/wt/view/identities.cpp
 	src/alpha/wt/view/message.cpp
+	src/alpha/wt/view/register_form.cpp
+	src/tml/datafile.cpp
+	src/tml/query.cpp
+	src/tml/relation.cpp
+	src/tml/relationfile.cpp
 )
 set(ALPHA_COMPILE_OPTION
 	"$<$<CONFIG:DEBUG>:-O0;-ggdb3>"
@@ -88,6 +105,7 @@ set(Wt_HTTP_LIBRARY ${Wt_LIBRARY_DIR}/libwthttp.a)
 # TML
 add_subdirectory(${TML_DIR})
 set_target_properties(tml TMLso PROPERTIES
+	CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}"
 	EXCLUDE_FROM_ALL 1 # do not build tml executable and so by default
 	EXCLUDE_FROM_DEFAULT_BUILD 1) # ... static library is enough
 

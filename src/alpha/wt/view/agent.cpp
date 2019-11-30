@@ -20,18 +20,22 @@
 
 namespace alpha::wt::view {
 
-sp_agent agent::get_agent(const agent_id& aid) {
-	return app::instance()->agents()->get(aid);
+using std::make_unique;
+
+alpha::agent* agent::get_agent() {
+	return a;
 }
 
-agent::agent(const render_type& type, const agent_id& aid)
- : agent(type, get_agent(aid)) {}
-
-agent::agent(const render_type& type, sp_agent sa) : type(type), sa(sa) {
+agent::agent(const render_type& type, alpha::agent* a) : type(type), a(a) {
 	app::instance()->messageResourceBundle().use("messages/agent");
 	std::stringstream ss; ss << "agent agent-" << type_names[type];
 	addStyleClass(ss.str());
-	if (!sa) return;
+	if (!a) return;
+	render();
+}
+
+void agent::set_agent(alpha::agent* newa) {
+	a = newa;
 	render();
 }
 
@@ -41,12 +45,12 @@ void agent::render() {
 }
 
 void agent::bind_data() {
-	if (!sa) return;
-	bindWidget("id",         std::make_unique<Wt::WText>(sa->id));
-	bindWidget("name",       std::make_unique<Wt::WText>(sa->name));
-	bindWidget("other_name", std::make_unique<Wt::WText>(sa->other_name));
+	if (!a) return;
+	bindWidget("id",         std::make_unique<Wt::WText>(a->id));
+	bindWidget("name",       std::make_unique<Wt::WText>(a->name));
+	bindWidget("other_name", std::make_unique<Wt::WText>(a->other_name));
+	bindWidget("created",    std::make_unique<Wt::WText>(
+						print_date(a->created)));
 }
-
-
 
 }

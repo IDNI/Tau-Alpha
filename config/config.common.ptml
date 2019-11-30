@@ -1,0 +1,20 @@
+enabled(?name),
+~enable(?name) :-
+	enable(?name).
+
+~enabled(?name),
+~disable(?name) :-
+	disable(?name).
+
+selected(?name ?option),
+~selected(?name ?anything),
+~select(?name ?option) :-
+	select(?name ?option), ?anything != ?option.
+
+~selected(?name ?anything),
+~unselect(?name) :-
+	unselect(?name).
+
+~selected(?name ?option),
+~unselect(?name ?option) :-
+	unselect(?name ?option).

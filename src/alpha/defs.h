@@ -19,10 +19,12 @@
 #include <array>
 #include <iostream>
 #include <memory>
+#include <chrono>
+#include <ctime>
 
 namespace alpha {
 
-typedef time_t timestamp;
+typedef std::chrono::system_clock::time_point timestamp;
 typedef std::array<timestamp, 2> timerange;
 typedef std::string file;
 typedef std::string unique_id;
@@ -44,6 +46,12 @@ typedef std::vector<message_id> message_ids;
 typedef std::vector<std::string> strings;
 
 std::ostream& operator<<(std::ostream& os, const strings& strs);
+std::ostream& operator<<(std::ostream& os, const timestamp& ts);
+std::istream& operator>>(std::istream& is, timestamp& ts);
+timestamp parse_date(const std::string& date);
+std::string print_date(const timestamp& ts);
+std::string now();
+strings split(std::string str, char delimiter=',');
 
 struct object {};
 

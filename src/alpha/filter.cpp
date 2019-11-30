@@ -16,6 +16,7 @@ namespace alpha {
 
 using std::regex_match;
 using std::regex;
+using std::chrono::system_clock;
 
 regex re(std::string s) {
 	std::stringstream ss;
@@ -26,33 +27,35 @@ regex re(std::string s) {
 bool message_f::match(const message& m) const {
 	if (id != "" && id != m.id) return false;
 	if (author != "" && author != m.author) return false;
-	if (subject != "" && !regex_match(m.subject, re(subject)))
-		return false;
+	if (subject != "" && !regex_match(m.subject, re(subject))) return false;
 	if (targets.size()) {
 		for (auto chid : m.targets)
 			for (auto t : targets)
 				if (chid == t) return true;
 		return false;
 	}
-	if (content != "" && !regex_match(m.content, re(content)))
-		return false;
+	if (content != "" && !regex_match(m.content, re(content))) return false;
+	if (created[0] != timestamp{} && m.created < created[0])   return false;
+	if (created[1] != timestamp{} && m.created > created[1])   return false;
 	return true;
 }
 
 bool channel_f::match(const channel& ch) const {
 	if (id != "" && id != ch.id) return false;
 	if (creator != "" && creator != ch.creator) return false;
-	if (name != "" && !regex_match(ch.name, re(name)))
-		return false;
+	if (name != "" && !regex_match(ch.name, re(name))) return false;
+	if (created[0] != timestamp{} && ch.created < created[0]) return false;
+	if (created[1] != timestamp{} && ch.created > created[1]) return false;
 	return true;
 }
 
 bool agent_f::match(const agent& a) const {
 	if (id != "" && id != a.id) return false;
-	if (name != "" && !regex_match(a.name, re(name)))
-		return false;
+	if (name != "" && !regex_match(a.name, re(name))) return false;
 	if (other_name != "" && !regex_match(a.other_name, re(other_name)))
 		return false;
+	if (created[0] != timestamp{} && a.created < created[0]) return false;
+	if (created[1] != timestamp{} && a.created > created[1]) return false;
 	return true;
 }
 

@@ -19,16 +19,17 @@
 namespace alpha::wt::view {
 
 struct agent : public Wt::WTemplate {
-	enum render_type { SHORT, DETAIL, EDIT };
-	strings type_names = { "short", "detail", "edit" };
-	sp_agent get_agent(const agent_id& aid);
-	agent(const render_type& type, const agent_id& aid);
-	agent(const render_type& type, sp_agent sa=0);
+	enum render_type { SHORT, DETAIL };
+	strings type_names = { "short", "detail" };
+	//void set_agent(const agent_id& aid);
+	void set_agent(alpha::agent* newa);
+	alpha::agent* get_agent();
+	agent(const render_type& type, alpha::agent* a);
+private:
+	render_type type{DETAIL};
+	alpha::agent* a;
 	void render();
 	void bind_data();
-private:
-	render_type type;
-	sp_agent sa;
 };
 
 }

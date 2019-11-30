@@ -10,26 +10,34 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
-#ifndef __ALPHA_WT_VIEW_CHANNEL_H__
-#define __ALPHA_WT_VIEW_CHANNEL_H__
-#include <Wt/WTemplate.h>
+#ifndef __ALPHA_WT_VIEW_REGISTER_FORM_H__
+#define __ALPHA_WT_VIEW_REGISTER_FORM_H__
 
-#include "../../channel.h"
+#include <Wt/WTable.h>
+#include <Wt/WFormWidget.h>
+#include <Wt/WString.h>
+#include <Wt/WLineEdit.h>
+#include <Wt/WContainerWidget.h>
+
+#include "../../agent.h"
 
 namespace alpha::wt::view {
 
-struct channel : public Wt::WTemplate {
-	channel(alpha::channel *ch=0, bool form=true);
-	void render();
-	void bind_data();
-	void bind_messages();
-	void set_channel(alpha::channel *newch=0) { ch = newch; render(); }
-	void set_form(bool newform=true) { form = newform; render(); }
-	channel_id get_channel_id() { return ch ? ch->id : ""; }
+class register_form : public Wt::WTable {
+public:
+	register_form();
+	void submit();
+	void create_ui();
+
 private:
-	alpha::channel *ch{0};
-	bool form{true};
-	message* post_form{0};
+	std::unique_ptr<agent> agent_;
+	Wt::WContainerWidget *info_messages_;
+	Wt::WContainerWidget *error_messages_;
+	Wt::WLineEdit *name_;
+	Wt::WLineEdit *other_name_;
+	void add_validation_status(int row, Wt::WFormWidget *field);
+	bool validate();
+	bool check_valid(Wt::WFormWidget *edit, const Wt::WString& text);
 };
 
 }

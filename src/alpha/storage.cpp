@@ -24,22 +24,25 @@ template class storage<channel>;
 template class storage<message>;
 
 template<typename T>
-sp<T> storage<T>::get(const unique_id& id) {
-	//console_log("get "+id); //, data[id].get());
+typename storage<T>::item storage<T>::get(const unique_id& id) {
+	if (id == "") return 0;
 	auto it = data.find(id);
 	if (it == data.end()) {
 		auto ids = protocol::fetch<T>(sid, { id });
+		// std::cout << "storage::get found n ids: " << ids.size() << std::endl;
 		if (!ids.size()) return 0;
 		data[id] = make_shared<T>(ids[0]);
-		//console_log("fetching new"); //, data[id].get());
+		// std::cout << "\tfetching new object with id: " << ids[0] << std::endl;
+		// console_log("fetching new"); //, data[id].get());
 		return data[id];
 	}
-	//console_log("fetching ok");
+	// std::cout << "\tfetching ok" << std::endl;
+	// console_log("fetching ok");
 	return it->second;
 }
 
 template<typename T>
-sp<T> storage<T>::get(const filter &f) {
+typename storage<T>::item storage<T>::get(const filter &f) {
 	unique_ids ids = protocol::query<T>(sid, f);
 	//log("ids got: ") << ids.size();
 	if (!ids.size()) return 0;
@@ -47,11 +50,12 @@ sp<T> storage<T>::get(const filter &f) {
 }
 
 template<typename T>
-vector<sp<T>> storage<T>::get_list(const unique_ids &ids) {
+vector<typename storage<T>::item> storage<T>::get_list(const unique_ids &ids) {
+	// std::cout << "storage::get_list " << ids << std::endl; //, data[id].get());
 	if (!ids.size()) return {};
 	//console_log("get "+id); //, data[id].get());
 	unique_ids to_fetch{};
-	vector<sp<T>> r(ids.size());
+	vector<typename storage<T>::item> r(ids.size());
 	size_t i = 0;
 	for (auto &id : ids) {
 		auto it = data.find(id);
@@ -63,17 +67,23 @@ vector<sp<T>> storage<T>::get_list(const unique_ids &ids) {
 	auto got = protocol::fetch<T>(sid, to_fetch);
 	auto it = got.begin();
 	for (auto rit = r.begin(); rit != r.end(); rit++) {
-		auto &v = *rit;
-		if (it != got.end() && !v.get())
-			v = make_shared<T>(*it++);
+		if (it != got.end() && !(*rit).get()) {
+			*rit = make_shared<T>(*it);
+			++it;
+		}
+	}
+	i = 0;
+	for (auto e : r) {
+		std::cout << i++ << " e: " << *e << std::endl;
 	}
 	return r;
 }
 
 template<typename T>
-vector<sp<T>> storage<T>::get_list(const filter &f) {
+vector<typename storage<T>::item> storage<T>::get_list(const filter &f) {
+	// std::cout << "storage::get_list with filter sid: "<<sid<< std::endl;
 	unique_ids ids = protocol::query<T>(sid, f);
-	//log("ids.size() ") << ids.size();
+	// std::cout << "\tfound n ids: "<<ids.size()<< std::endl;
 	if (!ids.size()) return {};
 	return get_list(ids);
 }

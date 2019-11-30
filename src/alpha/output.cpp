@@ -10,6 +10,10 @@
 // from the Author (Ohad Asor).
 // Contact ohad@idni.org for requesting a permission. This license may be
 // modified over time by the Author.
+#include <iomanip>
+#include <ctime>
+#include <chrono>
+
 #include "message.h"
 #include "agent.h"
 #include "channel.h"
@@ -17,7 +21,9 @@
 
 namespace alpha {
 
+using namespace std::chrono;
 using std::ostream;
+using std::istream;
 
 inline std::string con(bool first) { return first ? " " : ", "; }
 
@@ -42,8 +48,7 @@ ostream& operator<<(ostream& os, const agent& a) {
 	return os
 		<< "agent{ id: `"<<a.id
 		<< "`, name: `"<<a.name
-		<< "`, other_name: `"<<a.other_name
-		<< "`, password: ******************** }";
+		<< "`, other_name: `"<<a.other_name;
 }
 
 ostream& operator<<(ostream& os, const channel& ch) {
@@ -60,6 +65,14 @@ ostream& operator<<(ostream& os, const strings& strs) {
 	for (auto &s : strs)
 		os << con(first) << '"' << s << '"', first = false;
 	return os << " }";
+}
+
+ostream& operator<<(ostream& os, const timestamp& ts) {
+	time_t tt = system_clock::to_time_t(ts);
+	os << std::put_time(gmtime(&tt), "%FT%T");
+	timestamp ts2 = system_clock::from_time_t(tt);
+	auto mss = duration_cast<microseconds>(ts-ts2).count();
+	return os << "." << std::fixed<<std::setw(6)<<std::setfill('0') << mss;
 }
 
 ostream& operator<<(ostream& os, const message_f& f) {

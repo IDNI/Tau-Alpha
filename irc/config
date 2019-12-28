@@ -1,0 +1,7 @@
+: "${ircdir:=$HOME/irc}"
+: "${outdir:=$HOME/out}"
+: "${url:=http://tau.builders/taubot}"
+: "${nickname:=mr_tau}"
+: "${network=chat.freenode.net}"
+: "${channel=##mr_tau}"
+: "${tml=/usr/bin/tml}"

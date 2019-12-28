@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+. ./config
+
+chmod 700 "$ircdir"
+chmod 600 "$ircdir"/*/ident &>/dev/null
+
+while true; do
+    rm -f "$ircdir/$network/in"
+    ii -s $network -n $nickname -f "taubot - Tau Alpha IRC bot. Use 'tau: .help.' or '/msg $nickname .help.'" &
+    pid="$!"
+    while ! test -p "$ircdir/$network/in"; do sleep 1; done
+    [[ -e "$ircdir/$network/ident" ]] && \
+        printf -- "/j nickserv identify %s\n" "$(<"$ircdir/$network/ident")" > "$ircdir/$network/in"
+    rm -f "$ircdir/$network/nickserv/out" #
+    printf -- "/j %s\n" "$channel" > $ircdir/$network/in
+    wait "$pid"
+    echo "Restarting..."
+done

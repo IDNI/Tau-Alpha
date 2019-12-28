@@ -1,0 +1,97 @@
+################################################################################
+# list
+#
+
+system(output "#" "Commands: help, list, clear, add, del, db, rules, try, run, slot, list_slots, select, unselect, load, intersect. Use '.help(COMMAND).' to get help for the COMMAND.\\n#"
+		"Input prefixes: . (REPL), + and - (add/del rule), : (selecting slot), < (load), ? (intersect). Use '.help(\"PREFIX\").' to get help for the PREFIX.\\n"),
+~list
+	:- list.
+
+################################################################################
+# help and help(COMMAND/PREFIX)
+#
+
+system(output "#" "Each user can create slots and switch between them. Each slot has its own pair of a data database and a program database.\\n#"
+		"Data database contains only facts which are updated by executing TML code.\\n#"
+		"Program database contains rules. Use '+RULE' or '-RULE' to add/remove rule to/from a program database.\\n#"
+		"Use ':SLOT' to switch to another slot. Initial slot is called 'default'.\\n#"
+		"REPL commands are prefixed by a comma '.'. Use command '.list.' to get list of commands. Use '.help(COMMAND).' to get help for a command."),
+~help
+	:- help.
+
+system(output "# Prefix '.' is used to distinguish REPL commands. Ex: .list."),
+~help(".")
+	:- help(".").
+
+system(output "# Prefix '+' is used to add a RULE into the program database. '+RULE' is a shortcut of 'add(rule RULE).'"),
+~help("+")
+	:- help("+").
+
+system(output "# Prefix '-' is used to remove a RULE from the program database. '-RULE' is a shortcut of 'del(rule RULE).'"),
+~help("-")
+	:- help("-").
+
+system(output "# Prefix ':' is used to switch between slots. :SLOT is a shortcut of 'select(slot SLOT).'"),
+~help(":")
+	:- help(":").
+
+system(output "# Prefix '<' is used to load data from another slot or user/slot. '<SLOT' is a shortcut of 'load(SLOT).'"),
+~help("<")
+	:- help("<").
+
+system(output "# Prefix '?' is used to get intersection of current data database with data from another slot or user/slot. '?SLOT' is a shortcut of 'intersect(SLOT)'"),
+~help("?")
+	:- help("?").
+
+system(output "# Command '.help.' shows a basic usage of the bot."),
+~help(help)
+	:- help(help).
+
+system(output "# Command '.list.' shows a list of bot's commands."),
+~help(list)
+	:- help(list).
+
+system(output "#" "Command '.clear.' clears both data and program database.\\n#"
+		"Command '.clear(db).' clears data database and '.clear(rules).' clears program database."),
+~help(clear)
+	:- help(clear).
+
+system(output "# Command '.add(rule RULE).' adds new rule or use '+RULE.' as a shortcut."),
+~help(add)
+	:- help(add).
+
+system(output "# Command '.del(rule RULE).' deletes the RULE or use '-RULE.' as a shortcut."),
+~help(del)
+	:- help(del).
+
+system(output "# Command '.db.' displays facts contained in the data database."),
+~help(db)
+	:- help(db).
+
+system(output "# Command '.rules.' displays the list of rules (program database)."),
+~help(rules)
+	:- help(rules).
+
+system(output "# Command '.try.' or '.try(PROGRAM).' runs data and program databases (with PROGRAM if provided), displays result and does not update database."),
+~help(try)
+	:- help(try).
+
+system(output "# Command '.run.' or '.run(PROGRAM).' does the same as 'try' but 'run' updates the data database if try was satisfied and no error happened."),
+~help(run)
+	:- help(run).
+
+system(output "# Command '.slot.' shows current database slot."),
+~help(slot)
+	:- help(slot).
+
+system(output "# Command '.list_slots.' or '.list_slots(USER). shows list of user's slot."),
+~help(list_slots)
+	:- help(list_slots).
+
+system(output "# Command '.load(SLOT).' to load facts from another SLOT (SLOT can be slot, slot@user or @user). Use '<SLOT' as a shortcut."),
+~help(load)
+	:- help(load).
+
+system(output "# Command '.intersect(SLOT).' to result into intersection of current and another SLOT (SLOT can be slot, slot@user or @user). Use '?SLOT' as a shortcut"),
+~help(intersect)
+	:- help(intersect).

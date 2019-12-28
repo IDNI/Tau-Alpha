@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+. ./config
+
+declare -a monitored=()
+declare -a pids=()
+declare dir="$ircdir/$network"
+
+monitor() {
+	tail -F -n0 "$dir/$1/out" | \
+	while read -r time nick msg; do
+		[[ "$nick" == '-!-' ]] && continue
+		nick="${nick:1:-1}"
+		[[ "$nick" == "$nickname" ]] && continue
+		cmd="$msg"
+		[[ ${1:0:1} == "#" ]] && #if chan then cmd is after "tau:"
+			cmd=$(echo "$msg" | sed -e "s#^.*tau:##g") &&
+			[[ "$cmd" == "$msg" ]] && continue # or ignore
+		echo "$cmd" >> $ircdir/$network/$nick/command.log
+		exec ./command "$nick" "$cmd" "$ircdir" "$network" \
+			"$channel" "$nickname" "$url" "$outdir" | fold -w 255 &
+		pids+=($!)
+	done > "$dir/$1/in"
+}
+
+ensure_file() {
+	[[ ! -f "$1" ]] && touch "$1"
+}
+
+monitor_if_not() {
+	if [[ ! " ${monitored[@]} " =~ " ${1} " ]]; then
+		echo "monitoring $1"
+		monitor "$1" &
+		pids+=($!)
+		monitored+=("$1")
+	fi
+}
+
+while true; do
+	channels=$(find $dir/* -type d -print | sed -e "s#$dir/##g")
+	for channel in ${channels[*]}; do
+		[[ -f "$dir/$channel/out" ]] && \
+			[[ "$channel" != "NickServ" ]] && [[ "$channel" != "ChanServ" ]] && \
+			monitor_if_not "$channel"
+	done
+	sleep 1;
+done
+
+kill "${pids[@]}"

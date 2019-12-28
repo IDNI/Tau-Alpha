@@ -1,0 +1,157 @@
+################################################################################
+# db
+#
+
+system(clear db),
+system(output0 "# Db cleared")
+	:- clear(db).
+
+system(db),
+system(output0 "# Listing database:"),
+~db
+	:- db.
+
+system(output0 "# Listing database slot" ?slot ":"),
+system(db ?slot),
+~db(?slot)
+	:- db(?slot).
+
+################################################################################
+# rules
+#
+
+rules(?slot ?rule),
+~add(rule ?rule),
+system(output0 "# Added rule: " ?rule),
+system(rebuild_rule ?rule)
+	:- add(rule ?rule), selected(slot ?slot).
+
+~rules(?slot ?rule),
+~del(rule ?rule),
+system(output0 "# Removed rule: " ?rule),
+system(rebuild_rule ?rule)
+	:- del(rule ?rule), selected(slot ?slot).
+
+~rules(?slot ?rule),
+system(output0 "# Rules cleared")
+	:- clear(rules), rules(?slot ?rule), slot(?slot).
+
+system(output0 "# Listing rules:"),
+~rules
+	:- rules.
+system(output "    " ?x)
+	:- rules, rules(?slot ?x), selected(slot ?slot).
+
+system(output0 "# Listing rules:"),
+system(list_rules ?slot),
+~rules(?slot)
+	:- rules(?slot).
+
+################################################################################
+# common
+#
+
+clear(db),
+clear(rules),
+~clear
+	:- clear.
+
+################################################################################
+# execution - try and run
+#
+
+system(try),
+system(output0 "# Trying:"),
+~try
+	:- try.
+
+system(try ?what),
+system(output0 "# Trying:"),
+~try(?what)
+	:- try(?what).
+
+system(run),
+system(output0 "# Running:"),
+~run
+	:- run.
+
+system(run ?what),
+system(output0 "# Running:"),
+~run(?what)
+	:- run(?what).
+
+################################################################################
+# global settings (enabled, selected)
+#
+
+enabled(?name),
+system(output0 "# Enabled " ?name),
+~enable(?name)
+	:- enable(?name).
+
+~enabled(?name),
+system(output0 "# Disabled " ?name),
+~disable(?name)
+	:- disable(?name).
+
+selected(?name ?option),
+system(output0 "# Selected " ?name ": " ?option),
+~selected(?name ?anything),
+~select(?name ?option)
+	:- select(?name ?option), ?anything != ?option.
+
+~selected(?name ?anything),
+system(output0 "# Unselected " ?name),
+~unselect(?name)
+	:- unselect(?name).
+
+~selected(?name ?option),
+system(output0 "# Unselected " ?name ": " ?option),
+~unselect(?name ?option) :-
+    unselect(?name ?option).
+
+################################################################################
+# slots
+#
+
+~system(slot ?nonslot),
+system(slot ?slot),
+~slot(?nonslot),
+slot(?slot),
+slots(?slot)
+	:- select(slot ?slot), ?slot != ?nonslot.
+
+system(output0 "# Current slot: " ?what),
+~slot
+	:- slot, selected(slot ?what).
+
+system(output0 "# Loading data:" ?arg),
+system(load ?arg),
+~load(?arg)
+	:- load(?arg).
+
+system(output0 "# Loading rules:" ?arg),
+system(load_rules ?arg),
+~load_rules(?arg)
+	:- load_rules(?arg).
+
+system(output0 "# Intersecting:" ?arg),
+system(intersect ?arg),
+~intersect(?arg)
+	:- intersect(?arg).
+
+system(output0 "# Slots of:" ?user),
+~list_slots :- list_slots, user(?user).
+
+system(output "#    " ?slot)
+	:- list_slots, slots(?slot).
+
+system(list_slots ?user),
+~list_slots(?user)
+	:- list_slots(?user).
+
+system(runtime),
+system(output0 "# Listing runtime database:"),
+~runtime
+	:- runtime.
+

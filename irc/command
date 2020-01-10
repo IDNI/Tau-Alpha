@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-max_lines=6
+max_lines=5
 
 repl_prefix="."
 add_rule_prefix="+"
@@ -8,6 +8,8 @@ del_rule_prefix="-"
 slot_prefix=":"
 load_prefix="<"
 intersect_prefix="?"
+list_relation_prefix="|"
+delete_slot_prefix="/"
 
 OLDIFS=$IFS
 : "${tml=/usr/bin/tml}"
@@ -36,6 +38,13 @@ alpha_numeric() {
 	return 1
 }
 
+alphabetic() {
+	if grep -q '^[_a-zA-Z]\+$' <<<$1; then
+		return 0
+	fi
+	return 1
+}
+
 update_directories() {
 	# [[ "$slot" != "default" ]] && echo "Updating paths for slot: '$slot'."
 	datadir="$nickdir/data/$slot"
@@ -56,7 +65,6 @@ ensure_file() {
 	[[ ! -f "$1" ]] && touch "$1"
 }
 
-
 userslot() {
 	dtml2=""
 	while IFS=@ read -r slot_ nick_; do
@@ -69,9 +77,14 @@ userslot() {
 			echo "# Invalid argument: $args"
 			break
 		}
+		alphabetic "${slot:0:1}" || {
+			echo "# Invalid argument: $args"
+			break
+		}
 		nick2="$nick_"
 		slot2="$slot_"
 		dtml2="$ircd/$netw/$nick2/data/$slot2/data.tml"
+		ptml2="$ircd/$netw/$nick2/data/$slot2/prog.tml"
 		runtime2="$ircd/$netw/$nick2/runtime.tml"
 		return 0
 		break
@@ -80,7 +93,7 @@ userslot() {
 }
 
 is_unsat() {
-	grep -q '^unsat[\.(]' "$1"
+	grep -q '^unsat' "$1"
 }
 
 unquote() {
@@ -107,30 +120,38 @@ read_term() {
 runtime_() {
 	local runtime="$1"
 	$tml -o $runtime.out "${@:3}" -i $2 -i $runtime -i ./help.tml -error "$error_log" -no-info
-	[[ -s "$error_log" ]] && cat $error_log && return 0
-	is_unsat $runtime.out
+	[[ -s "$error_log" ]] && cat $error_log && return 1
 	if is_unsat $runtime.out; then
-		print_facts $runtime.out
+		output_file $runtime.out
 		return 1
 	fi
 }
 
 runtime() {
-	runtime_ "$runtime" $@
-	cat $runtime.out > $runtime
+	if runtime_ "$runtime" $@; then
+		cat $runtime.out > $runtime
+	fi
+}
+
+check_file_size_and_publish_and_return_true_if_empty() {
+	data="$1"
+	data_lines="$(wc -l <"$data")"
+	[[ $data_lines -le 0 ]] && return 0
+	[[ $data_lines -ge $max_lines ]] && \
+		file_name="$(date +%s).tml.txt" && \
+		echo "# More than $max_lines lines in the output. Truncating. See full output here: $url/$nick/$slot/$file_name." && \
+		output_path="$outd/$nick/$slot" && \
+		mkdir -p "$output_path" && \
+		cat "$data" > "$output_path/$file_name"
+	return 1
 }
 
 output_file() {
 	data="$1"
-	[[ ! -f "$data" ]] && echo "# No data database" && return
-	[[ $(wc -l <"$data") -ge $max_lines ]] && \
-		file_name="$(date +%s).tml.txt" && \
-		echo "# Too many facts in the database. Truncating output to $max_lines lines." && \
-		echo "# For full result go to $url/$nick/$slot/$file_name." && \
-		output_path="$outd/$nick/$slot" && \
-		mkdir -p "$output_path" && \
-		#echo "# Output: '$data' > '$output_path' / '$file_name'." && \
-		cat "$data" > "$output_path/$file_name"
+	[[ ! -f "$data" ]] && echo "#     No data" && return
+	if check_file_size_and_publish_and_return_true_if_empty "$data"; then
+		echo "#     Database is empty"
+	fi
 	head -n $max_lines $data | sed '/^$/d' | sed -e 's/^/    /'
 }
 
@@ -141,12 +162,30 @@ db() {
 	runtime ./clean.tml
 }
 
-rebuild_rules() {
-	runtime ./fileout_rules.tml
-	echo -n > $ptml
-	read_term "fileout_rule" | while IFS= read rule; do
-		unquote "$rule" >> $ptml
+list_rel() {
+	[[ -z "$1" ]] && db && return # no argument = same as db
+	data="$dtml"
+	[[ -n "$2" ]] && [[ "$2" != "" ]] && userslot "$2" && [[ -f "$dtml2" ]] && data=$dtml2
+	grep "^$1(" "$data" > "$data.list"
+	output_file "$data.list"
+	runtime ./clean.tml
+	rm "$data.list"
+}
+
+fileout_rules() {
+	rt="$1"
+	to="$2"
+	sl="$3"
+	[[ -z "$sl" ]] && sl=" selected(slot ?slot)" || sl=" ?slot=\"$sl\""
+	runtime_ "$rt" ./taubot.tml -ie "fileout_rule(?rule) :- rules(?slot ?rule), $sl."
+	read_term "fileout_rule" "$rt.out" | while IFS= read rule; do
+		unquote "$rule" >> $to
 	done
+}
+
+rebuild_rules() {
+	echo -n > $ptml
+	fileout_rules "$runtime" "$ptml"
 }
 
 try() {
@@ -155,7 +194,7 @@ try() {
 	ensure_file $ptml
 	ensure_file $error_log
 	[[ -n "$1" ]] && echo "$(unquote $1)" > $dtml.in
-	$tml -o $dtml.out -i $dtml.in -i $dtml -i $ptml -error "$error_log" -no-info
+	./benchmark $tml -o $dtml.out -i $dtml.in -i $dtml -i $ptml -error "$error_log" -no-info 2>&1
 	[[ -s "$error_log" ]] && cat $error_log && return 1
 	output_file "$dtml.out"
 	if is_unsat $dtml.out; then
@@ -172,16 +211,30 @@ run() {
 	return 1 # unsat or error
 }
 
+function token_quote {
+	local quoted=()
+	for token; do
+		quoted+=( $(printf '%q' "$(echo "$token" | sed 's#^"##' | sed 's#"$##g')" ) ) # fix syntax hilighting: "
+	done
+	echo "${quoted[*]}"
+}
+
+olines=0
 output() {
+	ll="$runtime.lastline"
 	while IFS="$OLDIFS" read -r line; do
 		echo "$line" >> $ircd/log
-		eval "arr=( $line )"
-		echo "array(${#arr[@]})='${arr[@]}'" >> $ircd/log
-		local IFS= ; shift; echo -e "${arr[@]}"
-	done <<< "$1" 
+		eval "arr=( $(token_quote $line) )"
+		#echo "array(${#arr[@]})='${arr[@]}'" >> $ircd/log
+		local IFS= ; shift; echo -e "$(echo -e "${arr[@]}")" > "$ll"
+		cat "$ll" >> "$runtime.output"
+		olines=$((olines + 1))
+		[[ "$olines" -le "$max_lines" ]] && cat "$ll" #&& sleep 1
+	done <<< "$1"
 }
 
 system_calls() {
+	echo -n > "$runtime.output"
 	read_term "system" >> $ircd/system.log
 	read_term "system" | while IFS="$OLDIFS" read -r action args; do
 		[[ "$action" == "output0" ]] && output "$args"
@@ -192,11 +245,29 @@ system_calls() {
 		slot)
 			slot="$args"
 			if alpha_numeric "$slot"; then
-				[[ "$slot" != "$(cat $runtime.slot)" ]] && \
-					echo "$slot" > $runtime.slot &&
-					update_directories
+				if alphabetic "${slot:0:1}"; then
+					[[ "$slot" != "$(cat $runtime.slot)" ]] && \
+						echo "$slot" > $runtime.slot &&
+						update_directories
+				else
+					echo "# Invalid slot name: '$slot'."
+				fi
 			else
-				echo "Invalid slot name: $slot."
+				echo "Invalid slot name: '$slot'."
+			fi
+			;;
+		delete_slot)
+			#slot="$args"
+			if alpha_numeric "$args"; then
+				if alphabetic "${args:0:1}"; then
+					[[ "$slot" == "$args" ]] && echo "# Cannot delete the selected slot '$slot'" && quit
+					rm -rf "$nickdir/data/$args"
+					echo "# Slot $args deleted"
+				else
+					echo "# Invalid slot name: '$mesg'."
+				fi
+			else
+				echo "# Invalid slot name: '$mesg'."
 			fi
 			;;
 		rebuild_rule)
@@ -208,7 +279,9 @@ system_calls() {
 				break
 			}
 			local runtime="$ircd/$netw/$args/runtime.tml"
-			[[ -f $runtime ]] && read_term "slots" "$runtime" || echo "# No slots found."
+			echo "# Slots of: $args"
+			[[ -f $runtime ]] && read_term "slots" "$runtime" >> "$runtime.list_slots" || echo "# No slots found."
+			[[ -s $runtime.list_slots ]] && output_file "$runtime.list_slots" && rm -rf "$runtime.list_slots"
 			;;
 		output0)
 			;;
@@ -220,27 +293,31 @@ system_calls() {
 			;;
 		load)
 			userslot "$args" || break
-			[[ -f $dtml2 ]] && cat $dtml2 > $dtml.in && run
+			[[ -f $dtml2 ]] && cat $dtml2 >> $dtml.in && run
 			;;
 		load_rules)
 			userslot "$args" || break
-			[[ -f $dtml2 ]] && cat $dtml2 > $dtml.in && run
-			;;
-		list_rules)
-			userslot "$args" || break
-			runtime_ "$runtime2" -i ./taubot.tml -ie "rules($slot2)" && cat "$runtime2.out"
+			echo -n > "$ptml2"
+			fileout_rules "$runtime2" "$ptml2" "$slot2"
+			while IFS= read -r line; do
+				echo "rules($slot $(quote $line))." >> "$runtime"
+			done < "$ptml2"
 			;;
 		intersect)
 			userslot "$args" || break
-			#dtml2="$ircd/$netw/$nick2/data/$slot2/data.tml"
 			[[ -f $dtml2 ]] && sort "$dtml" "$dtml2" | uniq -d > "$dtml.out" && \
-				print_facts "$dtml.out" && cat "$dtml.out" > "$dtml" #.in && run
+				output_file "$dtml.out" && cat "$dtml.out" > "$dtml" #.in && run
 			;;
 		db)
 			db "$args"
 			;;
+		list_relation)
+			while IFS="$OLDIFS" read -r rel_arg slot_arg rest; do
+				list_rel "$rel_arg" "$slot_arg"
+			done <<<"$args"
+			;;
 		runtime)
-			print_facts "$runtime"
+			output_file "$runtime"
 			;;
 		try)
 			try "$args"
@@ -248,12 +325,17 @@ system_calls() {
 		run)
 			run "$args"
 			;;
+		version)
+			$tml --version 2>&1
+			;;
 		*)
 			echo "default run" >> $ircd/log
 			run "$action $args"
 			;;
 		esac
 	done
+	check_file_size_and_publish_and_return_true_if_empty "$runtime.output"
+	echo -n > "$runtime.output"
 }
 
 run_command() {
@@ -270,9 +352,23 @@ read -r trimmed <<< "$mesg"
 
 dispatch() {
 	prefix="$1"
+	orig="$mesg"
 	# echo "$prefix noq '$mesg'" >> $ircd/log
-	[[ "${trimmed:0:1}" == "$prefix" ]] && mesg=$(echo $mesg | sed "s#^\s*$prefix\s*##") && return 0
+	[[ "${trimmed:0:1}" == "$prefix" ]] && mesg=$(echo $orig | sed "s#^\s*$prefix\s*##") && [[ "$orig" != "$mesg" ]] && return 0
 	return 1
+}
+
+syntax_check() {
+	echo -n > $error_log
+	echo "$1" > $dtml.in
+	$tml -i $dtml.in --no-run --error "$error_log" --no-info
+	echo -n > $dtml.in
+	[[ -s "$error_log" ]] && cat "$error_log" && return 1
+	return 0
+}
+
+quit() {
+	exit $1
 }
 
 update_directories
@@ -282,28 +378,48 @@ if dispatch "$repl_prefix"; then
 	cmd="${mesg#"${mesg%%[![:space:]]*}"}"                         # syntax highlighting fix: "
 	[[ "${cmd:${#cmd} - 1}" != "." ]] && cmd="${cmd}."
 	run_command "$cmd"
-	exit 0
+	quit
 fi
 
 if dispatch "$add_rule_prefix"; then
 	echo "mesg: $mesg" >> $ircd/log
-	echo "add(rule $(quote $mesg))." >> $ircd/log
-	run_command "add(rule $(quote $mesg))."
-	exit 0
+	if syntax_check "$mesg"; then
+		echo "add(rule $(quote $mesg))." >> $ircd/log
+		run_command "add(rule $(quote $mesg))."
+	fi
+	quit
 fi
 
 if dispatch "$del_rule_prefix"; then
 	run_command "del(rule $(quote $mesg))."
-	exit 0
+	quit
 fi
 
 if dispatch "$slot_prefix"; then
 	if alpha_numeric "$mesg"; then
-		run_command "select(slot $(quote $mesg))."
+		if alphabetic "${mesg:0:1}"; then
+			run_command "select(slot $(quote $mesg))."
+		else
+			echo "# Invalid slot name: '$mesg'."
+		fi
 	else
 		echo "# Invalid slot name: '$mesg'."
 	fi
-	exit 0
+	quit
+fi
+
+if dispatch "$delete_slot_prefix"; then
+	if alpha_numeric "$mesg"; then
+		if alphabetic "${mesg:0:1}"; then
+			[[ "$mesg" == "$slot" ]] && echo "# Cannot delete the selected slot '$slot'. Select another slot first." && quit
+			run_command "delete_slot($(quote $mesg))."
+		else
+			echo "# Invalid slot name: '$mesg'."
+		fi
+	else
+		echo "# Invalid slot name: '$mesg'."
+	fi
+	quit
 fi
 
 if dispatch "$load_prefix"; then
@@ -317,13 +433,26 @@ if dispatch "$load_prefix"; then
 		fi
 	fi
 	[[ $data == 0 ]] && run_command "load($(quote $mesg))."
-	[[ $rules == 0 ]] && run_command "load_rules($quote $mesg))"
-	exit 0
+	[[ $rules == 0 ]] && run_command "load_rules($(quote $mesg))."
+	quit
 fi
 
 if dispatch "$intersect_prefix"; then
 	run_command "intersect($(quote $mesg))."
-	exit 0
+	quit
+fi
+
+if dispatch "$list_relation_prefix"; then
+	while IFS="$OLDIFS" read -r rel_arg slot_arg rest; do
+		cmd="list(relation $(quote $rel_arg)"
+		[[ -n "$slot_arg" ]] && [[ "$slot_arg" != "" ]] &&
+			cmd="$cmd $(quote $slot_arg)"
+		cmd="$cmd)."
+		run_command "$cmd"
+		break
+	done <<<"$mesg"
+	quit
 fi
 
 run "$mesg"
+quit

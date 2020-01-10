@@ -42,11 +42,6 @@ system(output0 "# Listing rules:"),
 system(output "    " ?x)
 	:- rules, rules(?slot ?x), selected(slot ?slot).
 
-system(output0 "# Listing rules:"),
-system(list_rules ?slot),
-~rules(?slot)
-	:- rules(?slot).
-
 ################################################################################
 # common
 #
@@ -150,8 +145,35 @@ system(list_slots ?user),
 ~list_slots(?user)
 	:- list_slots(?user).
 
+system(delete_slot ?slot),
+~rules(?slot ?any),
+~slots(?slot),
+~delete_slot(?slot)
+	:- delete_slot(?slot).
+
+################################################################################
+# runtime
+#
+
 system(runtime),
 system(output0 "# Listing runtime database:"),
 ~runtime
 	:- runtime.
 
+system(version),
+~version
+	:- version.
+
+################################################################################
+# list relation
+#
+
+system(list_relation ?rel),
+system(output0 "# Listing relation:" ?rel),
+~list(relation ?rel)
+	:- list(relation ?rel).
+
+system(list_relation ?rel ?slot),
+system(output0 "# Listing relation:" ?rel "from slot:" ?slot),
+~list(relation ?rel ?slot)
+	:- list(relation ?rel ?slot).

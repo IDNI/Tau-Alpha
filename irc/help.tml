@@ -2,10 +2,12 @@
 # list
 #
 
-system(output "#" "Commands: help, list, clear, add, del, db, rules, try, run, slot, list_slots, select, unselect, load, intersect. Use '.help(COMMAND).' to get help for the COMMAND.\\n#"
-		"Input prefixes: . (REPL), + and - (add/del rule), : (selecting slot), < (load), ? (intersect). Use '.help(\"PREFIX\").' to get help for the PREFIX.\\n"),
+help_message(list "# Commands: help, list, clear, add, del, db, rules, try, run, slot, list_slots, delete_slot, select, unselect, load, intersect, version. Use '.help(COMMAND).' to get help for the COMMAND.\\n#"
+		"Input prefixes: . (REPL), + and - (add/del rule), : (selecting slot), / (deleting slot), < << or <<< (load), ? (intersect), | (list relation). Use '.help(\"PREFIX\").' to get help for the PREFIX.").
+
+system(output ?msg1 ?msg2),
 ~list
-	:- list.
+	:- list, help_message(list ?msg1 ?msg2).
 
 ################################################################################
 # help and help(COMMAND/PREFIX)
@@ -39,15 +41,32 @@ system(output "# Prefix '<' is used to load data from another slot or user/slot.
 ~help("<")
 	:- help("<").
 
+system(output "# Prefix '<<' is used to load rules from another slot or user/slot. '<<SLOT' is a shortcut of 'load_rules(SLOT).'"),
+~help("<<")
+	:- help("<<").
+
+system(output "# Prefix '<<<' is used to load both data and rules from another slot or user/slot. '<<<SLOT' is a shortcut of 'load(SLOT). load_rules(SLOT).'"),
+~help("<<<")
+	:- help("<<<").
+
 system(output "# Prefix '?' is used to get intersection of current data database with data from another slot or user/slot. '?SLOT' is a shortcut of 'intersect(SLOT)'"),
 ~help("?")
 	:- help("?").
+
+system(output "# Prefix '|' is for listing relations. '|REL SLOT' is a shortcut for 'list(relation REL SLOT)'. SLOT is 'default' if omitted."),
+~help("|")
+	:- help("|").
+
+system(output "# Prefix '/' is for deleting slots. '/SLOT' is a shortcut for 'delete_slot(SLOT)'. Only user's own slot which is not selected can be deleted."),
+~help("/")
+	:- help("/").
 
 system(output "# Command '.help.' shows a basic usage of the bot."),
 ~help(help)
 	:- help(help).
 
-system(output "# Command '.list.' shows a list of bot's commands."),
+system(output "# Command '.list.' shows a list of bot's commands.\\n#"
+		"Command '.list(relation REL SLOT).' displays relation REL from slot SLOT. Current slot is used if SLOT omitted."),
 ~help(list)
 	:- help(list).
 
@@ -64,11 +83,11 @@ system(output "# Command '.del(rule RULE).' deletes the RULE or use '-RULE.' as 
 ~help(del)
 	:- help(del).
 
-system(output "# Command '.db.' displays facts contained in the data database."),
+system(output "# Command '.db.' or '.db(SLOT).' displays facts contained in the data database of the SLOT (current slot is listed if omitted)."),
 ~help(db)
 	:- help(db).
 
-system(output "# Command '.rules.' displays the list of rules (program database)."),
+system(output "# Command '.rules.' or '.rules(SLOT).' displays the list of rules (program database) of the SLOT (current slot is listed if omitted)."),
 ~help(rules)
 	:- help(rules).
 
@@ -88,10 +107,22 @@ system(output "# Command '.list_slots.' or '.list_slots(USER). shows list of use
 ~help(list_slots)
 	:- help(list_slots).
 
+system(output "# Command '.delete_slot(SLOT).' deletes the SLOT. Only user's own slots which aren't currently selected can be deleted. Use '/SLOT' as a shortcut."),
+~help(delete_slot)
+	:- help(delete_slot).
+
 system(output "# Command '.load(SLOT).' to load facts from another SLOT (SLOT can be slot, slot@user or @user). Use '<SLOT' as a shortcut."),
 ~help(load)
 	:- help(load).
 
+system(output "# Command '.load_rules(SLOT).' to load rules from another SLOT (SLOT can be slot, slot@user or @user). Use '<SLOT' as a shortcut."),
+~help(load_rules)
+	:- help(load_rules).
+
 system(output "# Command '.intersect(SLOT).' to result into intersection of current and another SLOT (SLOT can be slot, slot@user or @user). Use '?SLOT' as a shortcut"),
 ~help(intersect)
 	:- help(intersect).
+
+system(output "# Command '.version.' displays version (commit) of TML used by bot."),
+~help(version)
+	:- help(version).

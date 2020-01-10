@@ -5,20 +5,34 @@
 declare -a monitored=()
 declare -a pids=()
 declare dir="$ircdir/$network"
+declare init=true
+
+read_quoted() {
+	echo "$@" | sed "s#^[^\`]*\`##" | sed "s#\`[^\`]*\$##"
+}
 
 monitor() {
-	tail -F -n0 "$dir/$1/out" | \
+	tail0or1=1
+	[[ $init == true ]] && tail0or1=0 # tail 0 if re-monitoring
+	tail -F "-n$tail0or1" "$dir/$1/out" | \
 	while read -r time nick msg; do
 		[[ "$nick" == '-!-' ]] && continue
 		nick="${nick:1:-1}"
 		[[ "$nick" == "$nickname" ]] && continue
 		cmd="$msg"
-		[[ ${1:0:1} == "#" ]] && #if chan then cmd is after "tau:"
-			cmd=$(echo "$msg" | sed -e "s#^.*tau:##g") &&
-			[[ "$cmd" == "$msg" ]] && continue # or ignore
+		 #if in channel then cmd is quoted in `` or is after "tau:"
+		[[ ${1:0:1} == "#" ]] &&
+			cmd="$(read_quoted "$msg")" && [[ "$cmd" == "$msg" ]] &&
+				cmd=$(echo "$msg" | sed -e "s#^.*tau:##g") &&
+					[[ "$cmd" == "$msg" ]] &&
+						continue # no cmd found
 		echo "$cmd" >> $ircdir/$network/$nick/command.log
 		exec ./command "$nick" "$cmd" "$ircdir" "$network" \
-			"$channel" "$nickname" "$url" "$outdir" | fold -w 255 &
+			"$channel" "$nickname" "$url" "$outdir" | \
+				while IFS= read -r line; do
+					echo "$line" | fold -w 255 &
+					sleep 1 # excess flood protection
+				done
 		pids+=($!)
 	done > "$dir/$1/in"
 }
@@ -44,6 +58,7 @@ while true; do
 			monitor_if_not "$channel"
 	done
 	sleep 1;
+	init=false
 done
 
 kill "${pids[@]}"
